@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetGrpcPrometheus", "NetGrpcPrometheus\NetGrpcPrometheus.csproj", "{645AAA98-440A-4AEA-B8E7-15B1C461365F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetGrpcPrometheusTest", "NetGrpcPrometheusTest\NetGrpcPrometheusTest.csproj", "{EDC596E3-3E87-4C13-9065-F7DD5DD6C9F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{645AAA98-440A-4AEA-B8E7-15B1C461365F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{645AAA98-440A-4AEA-B8E7-15B1C461365F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{645AAA98-440A-4AEA-B8E7-15B1C461365F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{645AAA98-440A-4AEA-B8E7-15B1C461365F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDC596E3-3E87-4C13-9065-F7DD5DD6C9F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDC596E3-3E87-4C13-9065-F7DD5DD6C9F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDC596E3-3E87-4C13-9065-F7DD5DD6C9F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDC596E3-3E87-4C13-9065-F7DD5DD6C9F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {361337C2-E3CF-41CC-B504-BCEEED85E43B}
+	EndGlobalSection
+EndGlobal
