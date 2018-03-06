@@ -4,6 +4,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Grpc.Core.Interceptors;
+using NetGrpcPrometheus;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
 
@@ -11,7 +13,7 @@ namespace NetGrpcPrometheusTest.Helpers
 {
     public class TestClient
     {
-        public static readonly MetricsBase ServerMetrics = new ClientMetrics();
+        public static readonly MetricsBase Metrics = new ClientMetrics();
 
         public string UnaryName => nameof(_client.UnaryPing);
         public string ClientStreamingName => nameof(_client.ClientStreamingPing);
@@ -22,13 +24,20 @@ namespace NetGrpcPrometheusTest.Helpers
 
         public TestClient()
         {
+            ClientInterceptor interceptor =
+                new ClientInterceptor("http://" + TestServer.MetricsHostname, TestServer.MetricsPort);
+            interceptor.EnableLatencyMetrics = true;
+
             Channel channel = new Channel(TestServer.GrpcHostname, TestServer.GrpcPort, ChannelCredentials.Insecure);
-            _client = new TestService.TestServiceClient(channel);
+            _client = new TestService.TestServiceClient(
+                channel.Intercept(interceptor));
             
             UnaryCall();
             ClientStreamingCall().Wait();
             ServerStreamingCall().Wait();
             DuplexStreamingCall().Wait();
+
+            Task.Run(() => { Thread.Sleep(5000); }).Wait();
         }
 
         private void UnaryCall()

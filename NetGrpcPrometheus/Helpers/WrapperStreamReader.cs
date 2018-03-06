@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 
 namespace NetGrpcPrometheus.Helpers
 {
-    class WrapperServerStreamReader<T> : IAsyncStreamReader<T>
+    public class WrapperStreamReader<T> : IAsyncStreamReader<T>
     {
         private readonly IAsyncStreamReader<T> _reader;
         private readonly Action _onMessage;
 
-        public WrapperServerStreamReader(IAsyncStreamReader<T> reader, Action onMessage)
+        public WrapperStreamReader(IAsyncStreamReader<T> reader, Action onMessage)
         {
             _reader = reader;
             _onMessage = onMessage;

@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-package NetGrpcPrometheusTest.grpc;
+package NetGrpcPrometheusTest;
 
 message PingRequest {
 	int32 value = 1;

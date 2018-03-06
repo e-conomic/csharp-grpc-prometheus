@@ -4,8 +4,9 @@ using Prometheus;
 
 namespace NetGrpcPrometheus.Models
 {
-    public class ServerMetrics : MetricsBase
+    public sealed class ServerMetrics : MetricsBase
     {
+        public override bool EnableLatencyMetrics { get; set; }
         public override Counter RequestCounter { get; }
         public override Counter ResponseCounter { get; }
         public override Counter StreamReceivedCounter { get; }
@@ -14,6 +15,8 @@ namespace NetGrpcPrometheus.Models
 
         public ServerMetrics()
         {
+            EnableLatencyMetrics = false;
+
             RequestCounter = Metrics.CreateCounter("grpc_server_started_total",
                 "Total number of RPCs started on the server", "grpc_type", "grpc_service", "grpc_method");
 

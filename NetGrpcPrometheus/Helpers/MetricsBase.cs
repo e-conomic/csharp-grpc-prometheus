@@ -3,51 +3,46 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using Grpc.Core;
+using NetGrpcPrometheus.Models;
 using Prometheus;
 
 namespace NetGrpcPrometheus.Helpers
 {
     public abstract class MetricsBase
     {
+        public abstract bool EnableLatencyMetrics { get; set; }
         public abstract Counter RequestCounter { get; }
         public abstract Counter ResponseCounter { get; }
         public abstract Counter StreamReceivedCounter { get; }
         public abstract Counter StreamSentCounter { get; }
         public abstract Histogram LatencyHistogram { get; }
-        
-        public virtual void RequestCounterInc(string callType, string serviceName, string methodName, double inc = 1d)
+
+        public virtual void RequestCounterInc(GrpcMethodInfo method, double inc = 1d)
         {
-            RequestCounter.Labels(callType, serviceName, methodName).Inc(inc);
+            RequestCounter.Labels(method.MethodType, method.ServiceName, method.Name).Inc(inc);
         }
 
-        public virtual void ResponseCounterInc(string callType, string serviceName, string method, StatusCode code, double inc = 1d)
+        public virtual void ResponseCounterInc(GrpcMethodInfo method, StatusCode code, double inc = 1d)
         {
-            ResponseCounter.Labels(callType, serviceName, method, code.ToString()).Inc(inc);
+            ResponseCounter.Labels(method.MethodType, method.ServiceName, method.Name, code.ToString()).Inc(inc);
         }
 
-        public virtual void StreamReceivedCounterInc(string callType, string serviceName, string methodName,
-            double inc = 1d)
+        public virtual void StreamReceivedCounterInc(GrpcMethodInfo method, double inc = 1d)
         {
-            StreamReceivedCounter.Labels(callType, serviceName, methodName).Inc(inc);
+            StreamReceivedCounter.Labels(method.MethodType, method.ServiceName, method.Name).Inc(inc);
         }
 
-        public virtual void StreamSentCounterInc(string callType, string serviceName, string methodName,
-            double inc = 1d)
+        public virtual void StreamSentCounterInc(GrpcMethodInfo method, double inc = 1d)
         {
-            StreamSentCounter.Labels(callType, serviceName, methodName).Inc(inc);
+            StreamSentCounter.Labels(method.MethodType, method.ServiceName, method.Name).Inc(inc);
         }
 
-        public virtual void RecordLatency(string callType, string serviceName, string method, double value)
+        public virtual void RecordLatency(GrpcMethodInfo method, double value)
         {
-            LatencyHistogram.Labels(callType, serviceName, method).Observe(value);
+            if (EnableLatencyMetrics)
+            {
+                LatencyHistogram.Labels(method.MethodType, method.ServiceName, method.Name).Observe(value);
+            }
         }
-    }
-
-    public static class GrpcCallType
-    {
-        public const string Unary = "unary";
-        public const string ServerStreaming = "server_stream";
-        public const string ClientStreaming = "client_stream";
-        public const string DuplexStreaming = "bidi_stream";
     }
 }
