@@ -3,4 +3,4 @@ branches:
     - master
 image: Visual Studio 2017
 build:
-  project: MyTestAzureCS.sln
+  project: NetGrpcPrometheus.sln
