@@ -93,7 +93,7 @@ namespace NetGrpcPrometheus
             }
             catch (Exception e)
             {
-                code = _statusCodes.FirstOrDefault(s => e.Message.Contains(s.ToString()));
+                code = _statusCodes.DefaultIfEmpty(StatusCode.Unknown).FirstOrDefault(s => e.Message.Contains(s.ToString()));
 
                 throw;
             }
