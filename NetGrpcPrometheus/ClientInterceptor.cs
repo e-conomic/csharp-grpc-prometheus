@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Grpc.Core;
@@ -28,7 +29,8 @@ namespace NetGrpcPrometheus
         private readonly MetricsBase _metrics;
 
         /// <summary>
-        /// Constructor for client side interceptor
+        /// Constructor for client side interceptor with metric server.
+        /// Metric server will be created and provide metrics on /metrics endpoint.
         /// </summary>
         /// <param name="hostname">Host name for Prometheus metrics server - e.g. localhost</param>
         /// <param name="port">Port for Prometheus server</param>
@@ -36,6 +38,31 @@ namespace NetGrpcPrometheus
         public ClientInterceptor(string hostname, int port, bool defaultMetrics = true)
         {
             MetricServer metricServer = new MetricServer(hostname, port);
+            metricServer.Start();
+
+            if (!defaultMetrics)
+            {
+                DefaultCollectorRegistry.Instance.Clear();
+            }
+
+            _metrics = new ClientMetrics();
+            _statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
+        }
+
+        /// <summary>
+        /// Constructor for client side interceptor with metric pusher.
+        /// Metric pusher will be created and will push metrics to the endpoint specified pushgateway
+        /// </summary>
+        /// <param name="endpoint">Endpoint for pushgateway - e.g. http://pushgateway.example.org:9091/metrics</param>
+        /// <param name="job"></param>
+        /// <param name="defaultMetrics"></param>
+        /// <param name="instance"></param>
+        /// <param name="intervalMilliseconds"></param>
+        /// <param name="additionalLabels"></param>
+        /// <param name="registry"></param>
+        public ClientInterceptor(string endpoint, string job, bool defaultMetrics = true, string instance = null, ulong intervalMilliseconds = 1000, IEnumerable<Tuple<string,string>> additionalLabels = null, ICollectorRegistry registry = null)
+        {
+            MetricPusher metricServer = new MetricPusher(endpoint, job, instance, (long) intervalMilliseconds, additionalLabels, registry);
             metricServer.Start();
 
             if (!defaultMetrics)
