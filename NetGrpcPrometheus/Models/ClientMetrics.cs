@@ -1,9 +1,12 @@
-﻿using System;
-using NetGrpcPrometheus.Helpers;
+﻿using NetGrpcPrometheus.Helpers;
 using Prometheus;
 
 namespace NetGrpcPrometheus.Models
 {
+    /// <summary>
+    /// Implementation of <see cref="MetricsBase"/>. 
+    /// Creates specific names and labes for metrics from the base class.
+    /// </summary>
     public sealed class ClientMetrics : MetricsBase
     {
         public override bool EnableLatencyMetrics { get; set; }
@@ -12,7 +15,7 @@ namespace NetGrpcPrometheus.Models
         public override Counter StreamReceivedCounter { get; }
         public override Counter StreamSentCounter { get; }
         public override Histogram LatencyHistogram { get; }
-
+        
         public ClientMetrics()
         {
             EnableLatencyMetrics = false;

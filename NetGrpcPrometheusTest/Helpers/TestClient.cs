@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -14,6 +13,8 @@ namespace NetGrpcPrometheusTest.Helpers
     public class TestClient
     {
         public static readonly MetricsBase Metrics = new ClientMetrics();
+        public static readonly string MetricsHostname = "127.0.0.1";
+        public static readonly int MetricsPort = 50053;
 
         public string UnaryName => nameof(_client.UnaryPing);
         public string ClientStreamingName => nameof(_client.ClientStreamingPing);
@@ -25,65 +26,116 @@ namespace NetGrpcPrometheusTest.Helpers
         public TestClient()
         {
             ClientInterceptor interceptor =
-                new ClientInterceptor("http://" + TestServer.MetricsHostname, TestServer.MetricsPort);
-            interceptor.EnableLatencyMetrics = true;
+                new ClientInterceptor(MetricsHostname, MetricsPort) {EnableLatencyMetrics = true};
 
             Channel channel = new Channel(TestServer.GrpcHostname, TestServer.GrpcPort, ChannelCredentials.Insecure);
             _client = new TestService.TestServiceClient(
                 channel.Intercept(interceptor));
-            
+
             UnaryCall();
+            UnaryCallAsync().Wait();
             ClientStreamingCall().Wait();
             ServerStreamingCall().Wait();
             DuplexStreamingCall().Wait();
 
-            Task.Run(() => { Thread.Sleep(5000); }).Wait();
+            int fakeGrpcPort = 50050;
+
+            channel = new Channel(TestServer.GrpcHostname, fakeGrpcPort, ChannelCredentials.Insecure);
+            _client = new TestService.TestServiceClient(
+                channel.Intercept(interceptor));
+
+            UnaryCall();
+            UnaryCallAsync().Wait();
+            ClientStreamingCall().Wait();
+            ServerStreamingCall().Wait();
+            DuplexStreamingCall().Wait();
+
+            Task.Run(() => { Thread.Sleep(2000); }).Wait();
         }
 
         private void UnaryCall()
         {
-            PingResponse response = _client.UnaryPing(new PingRequest() { Value = 1 });
+            try
+            {
+                _client.UnaryPing(new PingRequest() { Value = 1 });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
+        private async Task UnaryCallAsync()
+        {
+            try
+            {
+                await _client.UnaryPingAsync(new PingRequest() { Value = 1 });
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         private async Task ClientStreamingCall()
         {
-            using (AsyncClientStreamingCall<PingRequest, PingResponse> call = _client.ClientStreamingPing())
+            try
             {
-                await call.RequestStream.WriteAsync(new PingRequest() {Value = 1});
-                await call.RequestStream.CompleteAsync();
-                PingResponse response = await call.ResponseAsync;
+                using (AsyncClientStreamingCall<PingRequest, PingResponse> call = _client.ClientStreamingPing())
+                {
+                    await call.RequestStream.WriteAsync(new PingRequest() { Value = 1 });
+                    await call.RequestStream.CompleteAsync();
+                    await call.ResponseAsync;
+                }
             }
+            catch (Exception)
+            {
+                // ignored
+            }
+            
         }
 
         private async Task ServerStreamingCall()
         {
-            using (AsyncServerStreamingCall<PingResponse> call =
-                _client.ServerStreamingPing(new PingRequest() {Value = 1}))
+            try
             {
-                while (await call.ResponseStream.MoveNext(CancellationToken.None))
+                using (AsyncServerStreamingCall<PingResponse> call =
+                    _client.ServerStreamingPing(new PingRequest() { Value = 1 }))
                 {
-                    PingResponse response = call.ResponseStream.Current;
+                    while (await call.ResponseStream.MoveNext(CancellationToken.None))
+                    {
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                // ignored
             }
         }
 
         private async Task DuplexStreamingCall()
         {
-            using (AsyncDuplexStreamingCall<PingRequest, PingResponse> call = _client.DuplexPing())
+            try
             {
-                Task responseReaderTask = Task.Run(async () =>
+                using (AsyncDuplexStreamingCall<PingRequest, PingResponse> call = _client.DuplexPing())
                 {
-                    while (await call.ResponseStream.MoveNext())
+                    Task responseReaderTask = Task.Run(async () =>
                     {
-                        PingResponse response = call.ResponseStream.Current;
-                    }
-                });
+                        while (call != null && await call.ResponseStream.MoveNext())
+                        {
+                        }
+                    });
 
-                await call.RequestStream.WriteAsync(new PingRequest() {Value = 1});
-                await call.RequestStream.WriteAsync(new PingRequest() {Value = 1});
-                await call.RequestStream.CompleteAsync();
+                    await call.RequestStream.WriteAsync(new PingRequest() { Value = 1 });
+                    await call.RequestStream.WriteAsync(new PingRequest() { Value = 1 });
+                    await call.RequestStream.CompleteAsync();
 
-                await responseReaderTask;
+                    await responseReaderTask;
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
             }
         }
     }

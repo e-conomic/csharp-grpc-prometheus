@@ -1,18 +1,23 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
 using Prometheus;
+using Prometheus.Advanced;
 
 namespace NetGrpcPrometheus
 {
+    /// <summary>
+    /// Interceptor for intercepting calls on server side 
+    /// </summary>
     public class ServerInterceptor : Interceptor
     {
+        /// <summary>
+        /// Enable recording of latency for responses. By default it's set to false
+        /// </summary>
         public bool EnableLatencyMetrics
         {
             get => _metrics.EnableLatencyMetrics;
@@ -21,10 +26,21 @@ namespace NetGrpcPrometheus
 
         private readonly MetricsBase _metrics;
 
-        public ServerInterceptor(string hostname, int port)
+        /// <summary>
+        /// Constructor for server side interceptor
+        /// </summary>
+        /// <param name="hostname">Host name for Prometheus metrics server - e.g. localhost</param>
+        /// <param name="port">Port for Prometheus server</param>
+        /// <param name="defaultMetrics">Indicates if Prometheus metrics server should record default metrics</param>
+        public ServerInterceptor(string hostname, int port, bool defaultMetrics = true)
         {
             MetricServer metricServer = new MetricServer(hostname, port);
             metricServer.Start();
+
+            if (!defaultMetrics)
+            {
+                DefaultCollectorRegistry.Instance.Clear();
+            }
 
             _metrics = new ServerMetrics();
         }

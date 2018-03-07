@@ -1,5 +1,4 @@
-﻿using System;
-using Grpc.Core;
+﻿using Grpc.Core;
 using Grpc.Core.Interceptors;
 using NetGrpcPrometheus;
 using NetGrpcPrometheus.Helpers;
@@ -13,7 +12,7 @@ namespace NetGrpcPrometheusTest.Helpers
         public static readonly string GrpcHostname = "127.0.0.1";
         public static readonly int GrpcPort = 50051;
         public static readonly string MetricsHostname = "127.0.0.1";
-        public static readonly int MetricsPort = 8080;
+        public static readonly int MetricsPort = 50052;
         public static readonly string ServiceName = "NetGrpcPrometheusTest.TestService";
 
         public static readonly MetricsBase Metrics = new ServerMetrics();
@@ -22,8 +21,8 @@ namespace NetGrpcPrometheusTest.Helpers
 
         public TestServer()
         {
-            ServerInterceptor interceptor = new ServerInterceptor(MetricsHostname, MetricsPort);
-            interceptor.EnableLatencyMetrics = true;
+            ServerInterceptor interceptor =
+                new ServerInterceptor(MetricsHostname, MetricsPort) {EnableLatencyMetrics = true};
 
             _server = new Server()
             {

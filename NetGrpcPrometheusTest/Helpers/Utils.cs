@@ -1,25 +1,31 @@
 ﻿using System;
-using System.Globalization;
 using System.Net;
 
 namespace NetGrpcPrometheusTest.Helpers
 {
     public class Utils
     {
-        private static string _content;
-        
-        public static bool ContainsMetric(string metricName, string callType, string methodName)
+        public static bool ContainsMetric(string metricName, string callType, string methodName, string grpcCode, string hostname,
+            int port)
         {
-            if (String.IsNullOrEmpty(_content))
+            string content;
+
+            using (WebClient webClient = new WebClient())
             {
-                using (WebClient webClient = new WebClient())
-                {
-                    _content = webClient.DownloadString($@"http://{TestServer.MetricsHostname}:{TestServer.MetricsPort}/metrics");
-                }
+                content = webClient.DownloadString($@"http://{hostname}:{port}/metrics");
             }
 
-            return _content.Contains(
-                $"{metricName}{{grpc_type=\"{callType}\",grpc_service=\"{TestServer.ServiceName}\",grpc_method=\"{methodName}");
+
+            // e.g.:
+            //grpc_client_handled_total{grpc_type="unary",grpc_service="PrometheusTest.Grpc.MathService",grpc_method="ThanksWelcome",grpc_code="OK"}
+            if (String.IsNullOrEmpty(grpcCode))
+            {
+                return content.Contains(
+                    $"{metricName}{{grpc_type=\"{callType}\",grpc_service=\"{TestServer.ServiceName}\",grpc_method=\"{methodName}");
+            }
+
+            return content.Contains(
+                $"{metricName}{{grpc_type=\"{callType}\",grpc_service=\"{TestServer.ServiceName}\",grpc_method=\"{methodName}\",grpc_code=\"{grpcCode}\"");
         }
     }
 }

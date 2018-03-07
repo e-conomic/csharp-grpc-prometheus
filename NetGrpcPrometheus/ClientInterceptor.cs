@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using Google.Protobuf;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
 using Prometheus;
+using Prometheus.Advanced;
 
 namespace NetGrpcPrometheus
 {
+    /// <summary>
+    /// Interceptor for intercepting calls on client side
+    /// </summary>
     public class ClientInterceptor : Interceptor
     {
+        /// <summary>
+        /// Enable recording of latency for responses. By default it's set to false
+        /// </summary>
         public bool EnableLatencyMetrics
         {
             get => _metrics.EnableLatencyMetrics;
@@ -22,11 +27,22 @@ namespace NetGrpcPrometheus
         private readonly StatusCode[] _statusCodes;
         private readonly MetricsBase _metrics;
 
-        public ClientInterceptor(string hostname, int port)
+        /// <summary>
+        /// Constructor for client side interceptor
+        /// </summary>
+        /// <param name="hostname">Host name for Prometheus metrics server - e.g. localhost</param>
+        /// <param name="port">Port for Prometheus server</param>
+        /// <param name="defaultMetrics">Indicates if Prometheus metrics server should record default metrics</param>
+        public ClientInterceptor(string hostname, int port, bool defaultMetrics = true)
         {
-            MetricPusher metricPusher = new MetricPusher($"{hostname}:{port}", "job");
-            metricPusher.Start();
-            
+            MetricServer metricServer = new MetricServer(hostname, port);
+            metricServer.Start();
+
+            if (!defaultMetrics)
+            {
+                DefaultCollectorRegistry.Instance.Clear();
+            }
+
             _metrics = new ClientMetrics();
             _statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
         }
@@ -92,33 +108,6 @@ namespace NetGrpcPrometheus
             return result;
         }
 
-        public override AsyncServerStreamingCall<TResponse> AsyncServerStreamingCall<TRequest, TResponse>(
-            TRequest request,
-            ClientInterceptorContext<TRequest, TResponse> context,
-            AsyncServerStreamingCallContinuation<TRequest, TResponse> continuation)
-        {
-            GrpcMethodInfo method = new GrpcMethodInfo(context.Method.FullName, context.Method.Type);
-
-            _metrics.RequestCounterInc(method);
-
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-
-            AsyncServerStreamingCall<TResponse> streamingCall = continuation(request, context);
-
-            watch.Stop();
-            _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-            _metrics.ResponseCounterInc(method, StatusCode.OK);
-
-            AsyncServerStreamingCall<TResponse> result = new AsyncServerStreamingCall<TResponse>(
-                new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                    () => { _metrics.StreamReceivedCounterInc(method); }),
-                streamingCall.ResponseHeadersAsync, streamingCall.GetStatus, streamingCall.GetTrailers,
-                streamingCall.Dispose);
-            
-            return result;
-        }
-
         public override AsyncClientStreamingCall<TRequest, TResponse> AsyncClientStreamingCall<TRequest, TResponse>(
             ClientInterceptorContext<TRequest, TResponse> context,
             AsyncClientStreamingCallContinuation<TRequest, TResponse> continuation)
@@ -153,6 +142,34 @@ namespace NetGrpcPrometheus
             return result;
         }
 
+        public override AsyncServerStreamingCall<TResponse> AsyncServerStreamingCall<TRequest, TResponse>(
+            TRequest request,
+            ClientInterceptorContext<TRequest, TResponse> context,
+            AsyncServerStreamingCallContinuation<TRequest, TResponse> continuation)
+        {
+            GrpcMethodInfo method = new GrpcMethodInfo(context.Method.FullName, context.Method.Type);
+
+            _metrics.RequestCounterInc(method);
+
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+
+            AsyncServerStreamingCall<TResponse> streamingCall = continuation(request, context);
+
+            watch.Stop();
+            _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
+            // TODO: Investigate whether or not any response code should be returned on server streaming
+            _metrics.ResponseCounterInc(method, StatusCode.OK);
+
+            AsyncServerStreamingCall<TResponse> result = new AsyncServerStreamingCall<TResponse>(
+                new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
+                    () => { _metrics.StreamReceivedCounterInc(method); }),
+                streamingCall.ResponseHeadersAsync, streamingCall.GetStatus, streamingCall.GetTrailers,
+                streamingCall.Dispose);
+
+            return result;
+        }
+
         public override AsyncDuplexStreamingCall<TRequest, TResponse> AsyncDuplexStreamingCall<TRequest, TResponse>(
             ClientInterceptorContext<TRequest, TResponse> context,
             AsyncDuplexStreamingCallContinuation<TRequest, TResponse> continuation)
@@ -167,14 +184,16 @@ namespace NetGrpcPrometheus
             AsyncDuplexStreamingCall<TRequest, TResponse> streamingCall = continuation(context);
 
             watch.Stop();
-            _metrics.ResponseCounterInc(method, StatusCode.OK);
             _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
+            // TODO: Investigate whether or not any response code should be returned on server streaming
+            _metrics.ResponseCounterInc(method, StatusCode.OK);
 
+            WrapperStreamReader<TResponse> responseStream =
+                new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
+                    () => { _metrics.StreamReceivedCounterInc(method); });
             AsyncDuplexStreamingCall<TRequest, TResponse> result = new AsyncDuplexStreamingCall<TRequest, TResponse>(
                 new WrapperClientStreamWriter<TRequest>(streamingCall.RequestStream,
-                    () => { _metrics.StreamSentCounterInc(method); }),
-                new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                    () => { _metrics.StreamReceivedCounterInc(method); }),
+                    () => { _metrics.StreamSentCounterInc(method); }), responseStream,
                 streamingCall.ResponseHeadersAsync, streamingCall.GetStatus, streamingCall.GetTrailers,
                 streamingCall.Dispose);
 
