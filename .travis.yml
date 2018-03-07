@@ -1,0 +1,12 @@
+language: csharp
+mono: none
+sudo: required
+dist: trusty
+solution: NetGrpcPrometheus.sln
+dotnet: 2.1.4
+before_script:
+  - dotnet build NetGrpcPrometheus.sln
+script:
+  - dotnet test --no-build NetGrpcPrometheusTest/NetGrpcPrometheusTest.csproj
+notifications:
+    email: false

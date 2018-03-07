@@ -1,0 +1,21 @@
+﻿syntax = "proto3";
+
+package NetGrpcPrometheusTest;
+
+message PingRequest {
+	int32 value = 1;
+}
+
+message PingResponse {
+	int32 value = 1;
+}
+
+service TestService {
+	rpc UnaryPing(PingRequest) returns (PingResponse) {}
+
+	rpc ClientStreamingPing(stream PingRequest) returns (PingResponse) {}
+
+	rpc ServerStreamingPing(PingRequest) returns (stream PingResponse) {}
+
+	rpc DuplexPing(stream PingRequest) returns (stream PingResponse) {}
+}
