@@ -13,5 +13,5 @@ test_script:
 
 after_test:
   - ps: |
-      dotnet pack NetGrpcPrometheus/NetGrpcPrometheus.csproj -c Release /p:PackageVersion=$env:APPVEYOR_REPO_TAG
-      dotnet nuget push NetGrpcPrometheus/bin/Release/NetGrpcPrometheus.$env:APPVEYOR_REPO_TAG.nupkg -k $env:API_KEY_SECRET -s https://www.nuget.org
+      dotnet pack NetGrpcPrometheus/NetGrpcPrometheus.csproj -c Release /p:PackageVersion=$env:appveyor_repo_tag_name
+      dotnet nuget push NetGrpcPrometheus/bin/Release/NetGrpcPrometheus.$env:appveyor_repo_tag_name.nupkg -k $env:API_KEY_SECRET -s https://www.nuget.org
