@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>NetGrpcPrometheus</PackageId>
+    <Authors>Visma e-conomic</Authors>
+    <Company>Visma e-conomic</Company>
+    <Description>Prometheus monitoring for gRPC C# servers and clients
+</Description>
+    <PackageLicenseUrl>https://github.com/e-conomic/csharp-grpc-prometheus/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/e-conomic/csharp-grpc-prometheus</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/e-conomic/csharp-grpc-prometheus</RepositoryUrl>
+    <PackageTags>Prometheus gRPC Interceptor Metrics</PackageTags>
+    <Copyright>2018 Visma e-conomic</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
