@@ -1,6 +1,17 @@
+version: 1.0.{build}
+image: Visual Studio 2017
 branches:
   only:
-    - master
-image: Visual Studio 2017
-build:
-  project: NetGrpcPrometheus.sln
+  - master
+skip_non_tags: true
+
+build_script:
+  - dotnet build NetGrpcPrometheus.sln --configuration Release
+
+test_script:
+  - dotnet test NetGrpcPrometheusTest/NetGrpcPrometheusTest.csproj --no-build
+
+after_test:
+  - ps: |
+      dotnet pack NetGrpcPrometheus/NetGrpcPrometheus.csproj -c Release /p:PackageVersion=$env:APPVEYOR_REPO_TAG
+      dotnet nuget push NetGrpcPrometheus/bin/Release/NetGrpcPrometheus.$env:APPVEYOR_REPO_TAG.nupkg -k $env:API_KEY_SECRET -s https://www.nuget.org
