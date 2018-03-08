@@ -9,7 +9,7 @@ build_script:
   - dotnet build NetGrpcPrometheus.sln --configuration Release
 
 test_script:
-  - dotnet test NetGrpcPrometheusTest/NetGrpcPrometheusTest.csproj --no-build
+  - dotnet test NetGrpcPrometheusTest/NetGrpcPrometheusTest.csproj
 
 after_test:
   - ps: |
