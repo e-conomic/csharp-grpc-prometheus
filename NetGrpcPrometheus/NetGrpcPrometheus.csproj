@@ -10,8 +10,8 @@
     <PackageLicenseUrl>https://github.com/e-conomic/csharp-grpc-prometheus/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/e-conomic/csharp-grpc-prometheus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/e-conomic/csharp-grpc-prometheus</RepositoryUrl>
-    <PackageTags>Prometheus gRPC Interceptor Metrics</PackageTags>
-    <Copyright>2018 Visma e-conomic</Copyright>
+    <PackageTags>Prometheus gRPC Interceptor Metrics Intercept</PackageTags>
+    <Copyright>Copyright © 2018 Visma e-conomic</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

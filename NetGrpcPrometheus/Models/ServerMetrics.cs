@@ -18,8 +18,6 @@ namespace NetGrpcPrometheus.Models
 
         public ServerMetrics()
         {
-            EnableLatencyMetrics = false;
-
             RequestCounter = Metrics.CreateCounter("grpc_server_started_total",
                 "Total number of RPCs started on the server", "grpc_type", "grpc_service", "grpc_method");
 

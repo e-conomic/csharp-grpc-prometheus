@@ -10,6 +10,13 @@ namespace NetGrpcPrometheusTest
         private TestServer _server;
         private TestClient _client;
 
+        private static readonly string GrpcCodeOk = StatusCode.OK.ToString();
+        private static readonly string GrpcCodeInternal = StatusCode.Internal.ToString();
+        private static readonly string UnaryTypeName = "unary";
+        private static readonly string ClientStreamingTypeName = "client_stream";
+        private static readonly string ServerStreamingTypeName = "server_stream";
+        private static readonly string DuplexStreamingTypeName = "bidi_stream";
+
         [OneTimeSetUp]
         public void SetUp()
         {
@@ -26,198 +33,203 @@ namespace NetGrpcPrometheusTest
         [Test]
         public void Server_Unary()
         {
-            string callType = "unary";
-            string methodName = _client.UnaryName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, UnaryTypeName, _client.UnaryName,
+                null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, UnaryTypeName,
+                _client.UnaryName, GrpcCodeOk,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket", UnaryTypeName,
+                _client.UnaryName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
         }
 
         [Test]
         public void Server_ClientStreaming()
         {
-            string callType = "client_stream";
-            string methodName = _client.ClientStreamingName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, GrpcCodeOk,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamReceivedCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket",
+                ClientStreamingTypeName,
+                _client.ClientStreamingName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamReceivedCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
         }
 
         [Test]
         public void Server_ServerStreaming()
         {
-            string callType = "server_stream";
-            string methodName = _client.ServerStreamingName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, GrpcCodeOk,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamSentCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket",
+                ServerStreamingTypeName,
+                _client.ServerStreamingName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamSentCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
         }
 
         [Test]
         public void Server_DuplexStreaming()
         {
-            string callType = "bidi_stream";
-            string methodName = _client.DuplexStreamingName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, GrpcCodeOk,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamReceivedCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket",
+                DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamReceivedCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamSentCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.StreamSentCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestServer.MetricsHostname, TestServer.MetricsPort));
         }
 
         [Test]
+        public void Server_Failing_Unary()
+        {
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.RequestCounter.Name, UnaryTypeName, _client.UnaryName,
+                null,
+                TestServer.MetricsHostname, TestServer.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.ResponseCounter.Name, UnaryTypeName,
+                _client.UnaryName, GrpcCodeInternal,
+                TestServer.MetricsHostname, TestServer.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestServer.Metrics.LatencyHistogram.Name + "_bucket", UnaryTypeName,
+                _client.UnaryName, null, TestServer.MetricsHostname, TestServer.MetricsPort));
+        }
+        
+        [Test]
         public void Client_Unary()
         {
-            string callType = "unary";
-            string methodName = _client.UnaryName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, UnaryTypeName, _client.UnaryName,
+                null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, UnaryTypeName,
+                _client.UnaryName, GrpcCodeOk,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket", UnaryTypeName,
+                _client.UnaryName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
         }
 
         [Test]
         public void Client_ClientStreaming()
         {
-            string callType = "client_stream";
-            string methodName = _client.ClientStreamingName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, GrpcCodeOk,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket",
+                ClientStreamingTypeName,
+                _client.ClientStreamingName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
         }
 
         [Test]
         public void Client_ServerStreaming()
         {
-            string callType = "server_stream";
-            string methodName = _client.ServerStreamingName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, GrpcCodeOk,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket",
+                ServerStreamingTypeName,
+                _client.ServerStreamingName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
         }
 
         [Test]
         public void Client_DuplexStreaming()
         {
-            string callType = "bidi_stream";
-            string methodName = _client.DuplexStreamingName;
-            string grpcCode = StatusCode.OK.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, GrpcCodeOk,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket", callType,
-                methodName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.LatencyHistogram.Name + "_bucket",
+                DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null, TestClient.MetricsHostname, TestClient.MetricsPort));
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
         }
 
         [Test]
         public void Client_Failing_Unary()
         {
-            string callType = "unary";
-            string methodName = _client.UnaryName;
-            string grpcCode = StatusCode.Unavailable.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, UnaryTypeName, _client.UnaryName,
+                null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, UnaryTypeName,
+                _client.UnaryName, GrpcCodeInternal,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
         }
 
         [Test]
         public void Client_Failing_ClientStreaming()
         {
-            string callType = "client_stream";
-            string methodName = _client.ClientStreamingName;
-            string grpcCode = StatusCode.Unavailable.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, grpcCode,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, GrpcCodeInternal,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, ClientStreamingTypeName,
+                _client.ClientStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
         }
 
         [Test]
         public void Client_Failing_ServerStreaming()
         {
-            string callType = "server_stream";
-            string methodName = _client.ServerStreamingName;
-            // TODO: when response status code on server streaming will be resolved this should be used
-            // string grpcCode = StatusCode.Unavailable.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, ServerStreamingTypeName,
+                _client.ServerStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
         }
 
         [Test]
         public void Client_Failing_DuplexStreaming()
         {
-            string callType = "bidi_stream";
-            string methodName = _client.DuplexStreamingName;
-            // TODO: when response status code on server streaming will be resolved this should be used
-            // string grpcCode = StatusCode.Unavailable.ToString();
-
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.ResponseCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamReceivedCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
-            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, callType, methodName, null,
+            Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.StreamSentCounter.Name, DuplexStreamingTypeName,
+                _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
         }
     }

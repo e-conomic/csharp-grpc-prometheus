@@ -24,28 +24,37 @@ namespace NetGrpcPrometheusTest {
     static TestReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cgp0ZXN0LnByb3RvEhVOZXRHcnBjUHJvbWV0aGV1c1Rlc3QiHAoLUGluZ1Jl",
-            "cXVlc3QSDQoFdmFsdWUYASABKAUiHQoMUGluZ1Jlc3BvbnNlEg0KBXZhbHVl",
-            "GAEgASgFMooDCgtUZXN0U2VydmljZRJWCglVbmFyeVBpbmcSIi5OZXRHcnBj",
-            "UHJvbWV0aGV1c1Rlc3QuUGluZ1JlcXVlc3QaIy5OZXRHcnBjUHJvbWV0aGV1",
-            "c1Rlc3QuUGluZ1Jlc3BvbnNlIgASYgoTQ2xpZW50U3RyZWFtaW5nUGluZxIi",
-            "Lk5ldEdycGNQcm9tZXRoZXVzVGVzdC5QaW5nUmVxdWVzdBojLk5ldEdycGNQ",
-            "cm9tZXRoZXVzVGVzdC5QaW5nUmVzcG9uc2UiACgBEmIKE1NlcnZlclN0cmVh",
-            "bWluZ1BpbmcSIi5OZXRHcnBjUHJvbWV0aGV1c1Rlc3QuUGluZ1JlcXVlc3Qa",
-            "Iy5OZXRHcnBjUHJvbWV0aGV1c1Rlc3QuUGluZ1Jlc3BvbnNlIgAwARJbCgpE",
-            "dXBsZXhQaW5nEiIuTmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdSZXF1ZXN0",
-            "GiMuTmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdSZXNwb25zZSIAKAEwAWIG",
-            "cHJvdG8z"));
+            "Cgp0ZXN0LnByb3RvEhVOZXRHcnBjUHJvbWV0aGV1c1Rlc3QiPAoLUGluZ1Jl",
+            "cXVlc3QSLQoGc3RhdHVzGAEgASgOMh0uTmV0R3JwY1Byb21ldGhldXNUZXN0",
+            "LlN0YXR1cyIfCgxQaW5nUmVzcG9uc2USDwoHbWVzc2FnZRgBIAEoCSoZCgZT",
+            "dGF0dXMSBgoCT0sQABIHCgNCYWQQATKKAwoLVGVzdFNlcnZpY2USVgoJVW5h",
+            "cnlQaW5nEiIuTmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdSZXF1ZXN0GiMu",
+            "TmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdSZXNwb25zZSIAEmIKE0NsaWVu",
+            "dFN0cmVhbWluZ1BpbmcSIi5OZXRHcnBjUHJvbWV0aGV1c1Rlc3QuUGluZ1Jl",
+            "cXVlc3QaIy5OZXRHcnBjUHJvbWV0aGV1c1Rlc3QuUGluZ1Jlc3BvbnNlIgAo",
+            "ARJiChNTZXJ2ZXJTdHJlYW1pbmdQaW5nEiIuTmV0R3JwY1Byb21ldGhldXNU",
+            "ZXN0LlBpbmdSZXF1ZXN0GiMuTmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdS",
+            "ZXNwb25zZSIAMAESWwoKRHVwbGV4UGluZxIiLk5ldEdycGNQcm9tZXRoZXVz",
+            "VGVzdC5QaW5nUmVxdWVzdBojLk5ldEdycGNQcm9tZXRoZXVzVGVzdC5QaW5n",
+            "UmVzcG9uc2UiACgBMAFiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.PingRequest), global::NetGrpcPrometheusTest.PingRequest.Parser, new[]{ "Value" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.PingResponse), global::NetGrpcPrometheusTest.PingResponse.Parser, new[]{ "Value" }, null, null, null)
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::NetGrpcPrometheusTest.Status), }, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.PingRequest), global::NetGrpcPrometheusTest.PingRequest.Parser, new[]{ "Status" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.PingResponse), global::NetGrpcPrometheusTest.PingResponse.Parser, new[]{ "Message" }, null, null, null)
           }));
     }
     #endregion
 
   }
+  #region Enums
+  public enum Status {
+    [pbr::OriginalName("OK")] Ok = 0,
+    [pbr::OriginalName("Bad")] Bad = 1,
+  }
+
+  #endregion
+
   #region Messages
   public sealed partial class PingRequest : pb::IMessage<PingRequest> {
     private static readonly pb::MessageParser<PingRequest> _parser = new pb::MessageParser<PingRequest>(() => new PingRequest());
@@ -72,7 +81,7 @@ namespace NetGrpcPrometheusTest {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public PingRequest(PingRequest other) : this() {
-      value_ = other.value_;
+      status_ = other.status_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -81,14 +90,14 @@ namespace NetGrpcPrometheusTest {
       return new PingRequest(this);
     }
 
-    /// <summary>Field number for the "value" field.</summary>
-    public const int ValueFieldNumber = 1;
-    private int value_;
+    /// <summary>Field number for the "status" field.</summary>
+    public const int StatusFieldNumber = 1;
+    private global::NetGrpcPrometheusTest.Status status_ = 0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Value {
-      get { return value_; }
+    public global::NetGrpcPrometheusTest.Status Status {
+      get { return status_; }
       set {
-        value_ = value;
+        status_ = value;
       }
     }
 
@@ -105,14 +114,14 @@ namespace NetGrpcPrometheusTest {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (Value != other.Value) return false;
+      if (Status != other.Status) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (Value != 0) hash ^= Value.GetHashCode();
+      if (Status != 0) hash ^= Status.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -126,9 +135,9 @@ namespace NetGrpcPrometheusTest {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Value != 0) {
+      if (Status != 0) {
         output.WriteRawTag(8);
-        output.WriteInt32(Value);
+        output.WriteEnum((int) Status);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -138,8 +147,8 @@ namespace NetGrpcPrometheusTest {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (Value != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Value);
+      if (Status != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Status);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -152,8 +161,8 @@ namespace NetGrpcPrometheusTest {
       if (other == null) {
         return;
       }
-      if (other.Value != 0) {
-        Value = other.Value;
+      if (other.Status != 0) {
+        Status = other.Status;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -167,7 +176,7 @@ namespace NetGrpcPrometheusTest {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            Value = input.ReadInt32();
+            status_ = (global::NetGrpcPrometheusTest.Status) input.ReadEnum();
             break;
           }
         }
@@ -201,7 +210,7 @@ namespace NetGrpcPrometheusTest {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public PingResponse(PingResponse other) : this() {
-      value_ = other.value_;
+      message_ = other.message_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -210,14 +219,14 @@ namespace NetGrpcPrometheusTest {
       return new PingResponse(this);
     }
 
-    /// <summary>Field number for the "value" field.</summary>
-    public const int ValueFieldNumber = 1;
-    private int value_;
+    /// <summary>Field number for the "message" field.</summary>
+    public const int MessageFieldNumber = 1;
+    private string message_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Value {
-      get { return value_; }
+    public string Message {
+      get { return message_; }
       set {
-        value_ = value;
+        message_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -234,14 +243,14 @@ namespace NetGrpcPrometheusTest {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (Value != other.Value) return false;
+      if (Message != other.Message) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (Value != 0) hash ^= Value.GetHashCode();
+      if (Message.Length != 0) hash ^= Message.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -255,9 +264,9 @@ namespace NetGrpcPrometheusTest {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Value != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Value);
+      if (Message.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(Message);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -267,8 +276,8 @@ namespace NetGrpcPrometheusTest {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (Value != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Value);
+      if (Message.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Message);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -281,8 +290,8 @@ namespace NetGrpcPrometheusTest {
       if (other == null) {
         return;
       }
-      if (other.Value != 0) {
-        Value = other.Value;
+      if (other.Message.Length != 0) {
+        Message = other.Message;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -295,8 +304,8 @@ namespace NetGrpcPrometheusTest {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 8: {
-            Value = input.ReadInt32();
+          case 10: {
+            Message = input.ReadString();
             break;
           }
         }

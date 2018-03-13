@@ -14,10 +14,10 @@ namespace NetGrpcPrometheusTest.Helpers
             {
                 content = webClient.DownloadString($@"http://{hostname}:{port}/metrics");
             }
-
-
+            
             // e.g.:
-            //grpc_client_handled_total{grpc_type="unary",grpc_service="PrometheusTest.Grpc.MathService",grpc_method="ThanksWelcome",grpc_code="OK"}
+            // grpc_client_handled_total{grpc_type="unary",grpc_service="PrometheusTest.Grpc.MathService",grpc_method="ThanksWelcome",grpc_code="OK"}
+
             if (String.IsNullOrEmpty(grpcCode))
             {
                 return content.Contains(

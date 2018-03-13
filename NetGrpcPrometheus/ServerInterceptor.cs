@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
@@ -32,17 +31,19 @@ namespace NetGrpcPrometheus
         /// <param name="hostname">Host name for Prometheus metrics server - e.g. localhost</param>
         /// <param name="port">Port for Prometheus server</param>
         /// <param name="defaultMetrics">Indicates if Prometheus metrics server should record default metrics</param>
-        public ServerInterceptor(string hostname, int port, bool defaultMetrics = true)
+        /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
+        public ServerInterceptor(string hostname, int port, bool defaultMetrics = true, bool enableLatencyMetrics = false)
         {
             MetricServer metricServer = new MetricServer(hostname, port);
             metricServer.Start();
-
+            
             if (!defaultMetrics)
             {
                 DefaultCollectorRegistry.Instance.Clear();
             }
 
             _metrics = new ServerMetrics();
+            EnableLatencyMetrics = enableLatencyMetrics;
         }
 
         public override Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request,
@@ -56,14 +57,24 @@ namespace NetGrpcPrometheus
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            Task<TResponse> result = continuation(request, context);
-            result.ContinueWith((task, o) =>
+            Task<TResponse> result;
+
+            try
+            {
+                result = continuation(request, context);
+
+                _metrics.ResponseCounterInc(method, StatusCode.OK);
+            }
+            catch (RpcException e)
+            {
+                _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            finally
             {
                 watch.Stop();
-
                 _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-                _metrics.ResponseCounterInc(method, context.Status.StatusCode);
-            }, null, CancellationToken.None);
+            }
 
             return result;
         }
@@ -79,18 +90,27 @@ namespace NetGrpcPrometheus
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            Task result = continuation(request,
-                new WrapperServerStreamWriter<TResponse>(responseStream,
-                    () => { _metrics.StreamSentCounterInc(method); }),
-                context);
+            Task result;
 
-            result.ContinueWith((task, o) =>
+            try
+            {
+                result = continuation(request,
+                    new WrapperServerStreamWriter<TResponse>(responseStream,
+                        () => { _metrics.StreamSentCounterInc(method); }),
+                    context);
+
+                _metrics.ResponseCounterInc(method, StatusCode.OK);
+            }
+            catch (RpcException e)
+            {
+                _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            finally
             {
                 watch.Stop();
-
                 _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-                _metrics.ResponseCounterInc(method, context.Status.StatusCode);
-            }, null, CancellationToken.None);
+            }
 
             return result;
         }
@@ -106,21 +126,28 @@ namespace NetGrpcPrometheus
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            Task<TResponse> result =
-                continuation(
+            Task<TResponse> result;
+
+            try
+            {
+                result = continuation(
                     new WrapperStreamReader<TRequest>(requestStream,
                         () => { _metrics.StreamReceivedCounterInc(method); }), context);
 
-            result.ContinueWith((task, o) =>
+                _metrics.ResponseCounterInc(method, StatusCode.OK);
+            }
+            catch (RpcException e)
+            {
+                _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            finally
             {
                 watch.Stop();
-
                 _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-                _metrics.ResponseCounterInc(method, context.Status.StatusCode);
-            }, null, context.CancellationToken);
+            }
 
             return result;
-
         }
 
         public override Task DuplexStreamingServerHandler<TRequest, TResponse>(
@@ -135,18 +162,28 @@ namespace NetGrpcPrometheus
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            Task result = continuation(
-                new WrapperStreamReader<TRequest>(requestStream,
-                    () => { _metrics.StreamReceivedCounterInc(method); }),
-                new WrapperServerStreamWriter<TResponse>(responseStream,
-                    () => { _metrics.StreamSentCounterInc(method); }), context);
-            result.ContinueWith((task, o) =>
+            Task result;
+
+            try
+            {
+                result = continuation(
+                    new WrapperStreamReader<TRequest>(requestStream,
+                        () => { _metrics.StreamReceivedCounterInc(method); }),
+                    new WrapperServerStreamWriter<TResponse>(responseStream,
+                        () => { _metrics.StreamSentCounterInc(method); }), context);
+
+                _metrics.ResponseCounterInc(method, StatusCode.OK);
+            }
+            catch (RpcException e)
+            {
+                _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            finally
             {
                 watch.Stop();
-
                 _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-                _metrics.ResponseCounterInc(method, context.Status.StatusCode);
-            }, null, CancellationToken.None);
+            }
 
             return result;
         }
