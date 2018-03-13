@@ -8,26 +8,38 @@ namespace NetGrpcPrometheusTest.Grpc
     {
         public override Task<PingResponse> UnaryPing(PingRequest request, ServerCallContext context)
         {
-            return Task.FromResult(new PingResponse() { Value = 1 });
+            if (request.Status == Status.Ok)
+            {
+                return Task.FromResult(new PingResponse() {Message = "OK"});
+            }
+
+            ThrowException();
+            return null;
         }
 
         public override async Task<PingResponse> ClientStreamingPing(IAsyncStreamReader<PingRequest> requestStream, ServerCallContext context)
         {
-            int i = 0;
-
             while (await requestStream.MoveNext(CancellationToken.None))
             {
-                i++;
+                if (requestStream.Current.Status == Status.Bad)
+                {
+                    ThrowException();
+                }
             }
-
-            return new PingResponse() { Value = i };
+            
+            return new PingResponse() { Message = "OK" };
         }
 
         public override async Task ServerStreamingPing(PingRequest request, IServerStreamWriter<PingResponse> responseStream, ServerCallContext context)
         {
-            for (int i = 0; i < request.Value; i++)
+            if (request.Status == Status.Bad)
             {
-                await responseStream.WriteAsync(new PingResponse() { Value = 1 });
+                ThrowException();
+            }
+
+            for (int i = 0; i < 1; i++)
+            {
+                await responseStream.WriteAsync(new PingResponse() { Message = "OK" });
             }
         }
 
@@ -35,8 +47,19 @@ namespace NetGrpcPrometheusTest.Grpc
         {
             while (await requestStream.MoveNext(CancellationToken.None))
             {
-                await responseStream.WriteAsync(new PingResponse() { Value = 1 });
+                if (requestStream.Current.Status == Status.Bad)
+                {
+                    ThrowException();
+                }
+
+                await responseStream.WriteAsync(new PingResponse() { Message = "OK" });
             }
+        }
+
+        private void ThrowException()
+        {
+            global::Grpc.Core.Status status = new global::Grpc.Core.Status(StatusCode.Internal, "details");
+            throw new RpcException(status);
         }
     }
 }

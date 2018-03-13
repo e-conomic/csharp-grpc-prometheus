@@ -3,11 +3,16 @@
 package NetGrpcPrometheusTest;
 
 message PingRequest {
-	int32 value = 1;
+	Status status = 1;
 }
 
 message PingResponse {
-	int32 value = 1;
+	string message = 1;
+}
+
+enum Status {
+	OK = 0;
+	Bad = 1;
 }
 
 service TestService {

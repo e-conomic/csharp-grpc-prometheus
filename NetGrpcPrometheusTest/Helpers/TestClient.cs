@@ -38,38 +38,20 @@ namespace NetGrpcPrometheusTest.Helpers
             ServerStreamingCall().Wait();
             DuplexStreamingCall().Wait();
 
-            int fakeGrpcPort = 50050;
-
-            channel = new Channel(TestServer.GrpcHostname, fakeGrpcPort, ChannelCredentials.Insecure);
-            _client = new TestService.TestServiceClient(
-                channel.Intercept(interceptor));
-
-            UnaryCall();
-            UnaryCallAsync().Wait();
-            ClientStreamingCall().Wait();
-            ServerStreamingCall().Wait();
-            DuplexStreamingCall().Wait();
+            UnaryCall(Status.Bad);
+            UnaryCallAsync(Status.Bad).Wait();
+            ClientStreamingCall(Status.Bad).Wait();
+            ServerStreamingCall(Status.Bad).Wait();
+            DuplexStreamingCall(Status.Bad).Wait();
 
             Task.Run(() => { Thread.Sleep(2000); }).Wait();
         }
 
-        private void UnaryCall()
+        private void UnaryCall(Status status = Status.Ok)
         {
             try
             {
-                _client.UnaryPing(new PingRequest() { Value = 1 });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
-        private async Task UnaryCallAsync()
-        {
-            try
-            {
-                await _client.UnaryPingAsync(new PingRequest() { Value = 1 });
+                _client.UnaryPing(new PingRequest() { Status = status });
             }
             catch (Exception)
             {
@@ -77,13 +59,25 @@ namespace NetGrpcPrometheusTest.Helpers
             }
         }
 
-        private async Task ClientStreamingCall()
+        private async Task UnaryCallAsync(Status status = Status.Ok)
+        {
+            try
+            {
+                await _client.UnaryPingAsync(new PingRequest() { Status = status });
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        private async Task ClientStreamingCall(Status status = Status.Ok)
         {
             try
             {
                 using (AsyncClientStreamingCall<PingRequest, PingResponse> call = _client.ClientStreamingPing())
                 {
-                    await call.RequestStream.WriteAsync(new PingRequest() { Value = 1 });
+                    await call.RequestStream.WriteAsync(new PingRequest() { Status = status });
                     await call.RequestStream.CompleteAsync();
                     await call.ResponseAsync;
                 }
@@ -95,12 +89,12 @@ namespace NetGrpcPrometheusTest.Helpers
             
         }
 
-        private async Task ServerStreamingCall()
+        private async Task ServerStreamingCall(Status status = Status.Ok)
         {
             try
             {
                 using (AsyncServerStreamingCall<PingResponse> call =
-                    _client.ServerStreamingPing(new PingRequest() { Value = 1 }))
+                    _client.ServerStreamingPing(new PingRequest() { Status = status }))
                 {
                     while (await call.ResponseStream.MoveNext(CancellationToken.None))
                     {
@@ -113,7 +107,7 @@ namespace NetGrpcPrometheusTest.Helpers
             }
         }
 
-        private async Task DuplexStreamingCall()
+        private async Task DuplexStreamingCall(Status status = Status.Ok)
         {
             try
             {
@@ -126,8 +120,8 @@ namespace NetGrpcPrometheusTest.Helpers
                         }
                     });
 
-                    await call.RequestStream.WriteAsync(new PingRequest() { Value = 1 });
-                    await call.RequestStream.WriteAsync(new PingRequest() { Value = 1 });
+                    await call.RequestStream.WriteAsync(new PingRequest() { Status = status });
+                    await call.RequestStream.WriteAsync(new PingRequest() { Status = status });
                     await call.RequestStream.CompleteAsync();
 
                     await responseReaderTask;

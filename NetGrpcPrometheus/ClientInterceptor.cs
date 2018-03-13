@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using NetGrpcPrometheus.Helpers;
@@ -24,8 +23,7 @@ namespace NetGrpcPrometheus
             get => _metrics.EnableLatencyMetrics;
             set => _metrics.EnableLatencyMetrics = value;
         }
-
-        private readonly StatusCode[] _statusCodes;
+        
         private readonly MetricsBase _metrics;
 
         /// <summary>
@@ -35,7 +33,9 @@ namespace NetGrpcPrometheus
         /// <param name="hostname">Host name for Prometheus metrics server - e.g. localhost</param>
         /// <param name="port">Port for Prometheus server</param>
         /// <param name="defaultMetrics">Indicates if Prometheus metrics server should record default metrics</param>
-        public ClientInterceptor(string hostname, int port, bool defaultMetrics = true)
+        /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
+        public ClientInterceptor(string hostname, int port, bool defaultMetrics = true,
+            bool enableLatencyMetrics = false)
         {
             MetricServer metricServer = new MetricServer(hostname, port);
             metricServer.Start();
@@ -46,7 +46,8 @@ namespace NetGrpcPrometheus
             }
 
             _metrics = new ClientMetrics();
-            _statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
+            EnableLatencyMetrics = enableLatencyMetrics;
+            //_statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
         }
 
         /// <summary>
@@ -56,25 +57,30 @@ namespace NetGrpcPrometheus
         /// <param name="endpoint">Endpoint for pushgateway - e.g. http://pushgateway.example.org:9091/metrics</param>
         /// <param name="job"></param>
         /// <param name="defaultMetrics"></param>
+        /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
         /// <param name="instance"></param>
         /// <param name="intervalMilliseconds"></param>
         /// <param name="additionalLabels"></param>
         /// <param name="registry"></param>
-        public ClientInterceptor(string endpoint, string job, bool defaultMetrics = true, string instance = null, ulong intervalMilliseconds = 1000, IEnumerable<Tuple<string,string>> additionalLabels = null, ICollectorRegistry registry = null)
+        public ClientInterceptor(string endpoint, string job, bool defaultMetrics = true, bool enableLatencyMetrics = false,
+            string instance = null, ulong intervalMilliseconds = 1000,
+            IEnumerable<Tuple<string, string>> additionalLabels = null, ICollectorRegistry registry = null)
         {
-            MetricPusher metricServer = new MetricPusher(endpoint, job, instance, (long) intervalMilliseconds, additionalLabels, registry);
+            MetricPusher metricServer = new MetricPusher(endpoint, job, instance, (long) intervalMilliseconds,
+                additionalLabels, registry);
             metricServer.Start();
-
+            
             if (!defaultMetrics)
             {
                 DefaultCollectorRegistry.Instance.Clear();
             }
 
             _metrics = new ClientMetrics();
-            _statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
+            EnableLatencyMetrics = enableLatencyMetrics;
         }
 
-        public override TResponse BlockingUnaryCall<TRequest, TResponse>(TRequest request, ClientInterceptorContext<TRequest, TResponse> context,
+        public override TResponse BlockingUnaryCall<TRequest, TResponse>(TRequest request,
+            ClientInterceptorContext<TRequest, TResponse> context,
             BlockingUnaryCallContinuation<TRequest, TResponse> continuation)
         {
             GrpcMethodInfo method = new GrpcMethodInfo(context.Method.FullName, context.Method.Type);
@@ -85,25 +91,22 @@ namespace NetGrpcPrometheus
             watch.Start();
 
             TResponse result;
-            StatusCode code = StatusCode.OK;
 
             try
             {
                 result = continuation(request, context);
             }
-            catch (Exception e)
+            catch (RpcException e)
             {
-                code = _statusCodes.DefaultIfEmpty(StatusCode.Unknown).FirstOrDefault(s => e.Message.Contains(s.ToString()));
-
+                _metrics.ResponseCounterInc(method, e.Status.StatusCode);
                 throw;
             }
             finally
             {
                 watch.Stop();
                 _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-                _metrics.ResponseCounterInc(method, code);
             }
- 
+
             return result;
         }
 
@@ -119,17 +122,21 @@ namespace NetGrpcPrometheus
             watch.Start();
 
             AsyncUnaryCall<TResponse> result = continuation(request, context);
-
+            
             result.ResponseAsync.ContinueWith(task =>
             {
                 watch.Stop();
                 _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
 
-                StatusCode code = task.Exception == null
-                    ? StatusCode.OK
-                    : _statusCodes.FirstOrDefault(s => task.Exception.Message.Contains(s.ToString()));
-                
-                _metrics.ResponseCounterInc(method, code);
+                if (task.Exception == null)
+                {
+                    _metrics.ResponseCounterInc(method, StatusCode.OK);
+                }
+                else
+                {
+                    RpcException exception = (RpcException) task.Exception.InnerException;
+                    _metrics.ResponseCounterInc(method, exception.Status.StatusCode);
+                }
             });
 
             return result;
@@ -159,11 +166,15 @@ namespace NetGrpcPrometheus
                 watch.Stop();
                 _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
 
-                StatusCode code = task.Exception == null
-                    ? StatusCode.OK
-                    : _statusCodes.FirstOrDefault(s => task.Exception.Message.Contains(s.ToString()));
-
-                _metrics.ResponseCounterInc(method, code);
+                if (task.Exception == null)
+                {
+                    _metrics.ResponseCounterInc(method, StatusCode.OK);
+                }
+                else
+                {
+                    RpcException exception = (RpcException)task.Exception.InnerException;
+                    _metrics.ResponseCounterInc(method, exception.Status.StatusCode);
+                }
             });
 
             return result;
@@ -181,18 +192,29 @@ namespace NetGrpcPrometheus
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            AsyncServerStreamingCall<TResponse> streamingCall = continuation(request, context);
+            AsyncServerStreamingCall<TResponse> result;
 
-            watch.Stop();
-            _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-            // TODO: Investigate whether or not any response code should be returned on server streaming
-            _metrics.ResponseCounterInc(method, StatusCode.OK);
+            try
+            {
+                AsyncServerStreamingCall<TResponse> streamingCall = continuation(request, context);
 
-            AsyncServerStreamingCall<TResponse> result = new AsyncServerStreamingCall<TResponse>(
-                new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                    () => { _metrics.StreamReceivedCounterInc(method); }),
-                streamingCall.ResponseHeadersAsync, streamingCall.GetStatus, streamingCall.GetTrailers,
-                streamingCall.Dispose);
+                result = new AsyncServerStreamingCall<TResponse>(
+                    new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
+                        () => { _metrics.StreamReceivedCounterInc(method); }), streamingCall.ResponseHeadersAsync,
+                    streamingCall.GetStatus, streamingCall.GetTrailers, streamingCall.Dispose);
+
+                _metrics.ResponseCounterInc(method, StatusCode.OK);
+            }
+            catch (RpcException e)
+            {
+                _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            finally
+            {
+                watch.Stop();
+                _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
+            }
 
             return result;
         }
@@ -208,24 +230,36 @@ namespace NetGrpcPrometheus
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            AsyncDuplexStreamingCall<TRequest, TResponse> streamingCall = continuation(context);
+            AsyncDuplexStreamingCall<TRequest, TResponse> result;
 
-            watch.Stop();
-            _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
-            // TODO: Investigate whether or not any response code should be returned on server streaming
-            _metrics.ResponseCounterInc(method, StatusCode.OK);
+            try
+            {
+                AsyncDuplexStreamingCall<TRequest, TResponse> streamingCall = continuation(context);
 
-            WrapperStreamReader<TResponse> responseStream =
-                new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                    () => { _metrics.StreamReceivedCounterInc(method); });
-            AsyncDuplexStreamingCall<TRequest, TResponse> result = new AsyncDuplexStreamingCall<TRequest, TResponse>(
-                new WrapperClientStreamWriter<TRequest>(streamingCall.RequestStream,
-                    () => { _metrics.StreamSentCounterInc(method); }), responseStream,
-                streamingCall.ResponseHeadersAsync, streamingCall.GetStatus, streamingCall.GetTrailers,
-                streamingCall.Dispose);
+                WrapperStreamReader<TResponse> responseStream =
+                    new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
+                        () => { _metrics.StreamReceivedCounterInc(method); });
+
+                result = new AsyncDuplexStreamingCall<TRequest, TResponse>(
+                    new WrapperClientStreamWriter<TRequest>(streamingCall.RequestStream,
+                        () => { _metrics.StreamSentCounterInc(method); }), responseStream,
+                    streamingCall.ResponseHeadersAsync, streamingCall.GetStatus, streamingCall.GetTrailers,
+                    streamingCall.Dispose);
+
+                _metrics.ResponseCounterInc(method, StatusCode.OK);
+            }
+            catch (RpcException e)
+            {
+                _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            finally
+            {
+                watch.Stop();
+                _metrics.RecordLatency(method, watch.Elapsed.TotalSeconds);
+            }
 
             return result;
         }
-
     }
 }
