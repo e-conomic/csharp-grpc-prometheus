@@ -205,8 +205,6 @@ namespace NetGrpcPrometheusTest
         [Test]
         public void Client_Failing_ServerStreaming()
         {
-            // TODO: when response status code on server streaming will be resolved it should be tested
-
             Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, ServerStreamingTypeName,
                 _client.ServerStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
@@ -221,8 +219,6 @@ namespace NetGrpcPrometheusTest
         [Test]
         public void Client_Failing_DuplexStreaming()
         {
-            // TODO: when response status code on server streaming will be resolved it should be tested
-
             Assert.IsTrue(Utils.ContainsMetric(TestClient.Metrics.RequestCounter.Name, DuplexStreamingTypeName,
                 _client.DuplexStreamingName, null,
                 TestClient.MetricsHostname, TestClient.MetricsPort));
