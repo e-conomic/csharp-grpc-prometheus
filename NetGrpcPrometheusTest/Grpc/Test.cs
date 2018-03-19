@@ -9,7 +9,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace NetGrpcPrometheusTest {
+namespace NetGrpcPrometheusTest.Grpc {
 
   /// <summary>Holder for reflection information generated from test.proto</summary>
   public static partial class TestReflection {
@@ -24,24 +24,25 @@ namespace NetGrpcPrometheusTest {
     static TestReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cgp0ZXN0LnByb3RvEhVOZXRHcnBjUHJvbWV0aGV1c1Rlc3QiPAoLUGluZ1Jl",
-            "cXVlc3QSLQoGc3RhdHVzGAEgASgOMh0uTmV0R3JwY1Byb21ldGhldXNUZXN0",
-            "LlN0YXR1cyIfCgxQaW5nUmVzcG9uc2USDwoHbWVzc2FnZRgBIAEoCSoZCgZT",
-            "dGF0dXMSBgoCT0sQABIHCgNCYWQQATKKAwoLVGVzdFNlcnZpY2USVgoJVW5h",
-            "cnlQaW5nEiIuTmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdSZXF1ZXN0GiMu",
-            "TmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdSZXNwb25zZSIAEmIKE0NsaWVu",
-            "dFN0cmVhbWluZ1BpbmcSIi5OZXRHcnBjUHJvbWV0aGV1c1Rlc3QuUGluZ1Jl",
-            "cXVlc3QaIy5OZXRHcnBjUHJvbWV0aGV1c1Rlc3QuUGluZ1Jlc3BvbnNlIgAo",
-            "ARJiChNTZXJ2ZXJTdHJlYW1pbmdQaW5nEiIuTmV0R3JwY1Byb21ldGhldXNU",
-            "ZXN0LlBpbmdSZXF1ZXN0GiMuTmV0R3JwY1Byb21ldGhldXNUZXN0LlBpbmdS",
-            "ZXNwb25zZSIAMAESWwoKRHVwbGV4UGluZxIiLk5ldEdycGNQcm9tZXRoZXVz",
-            "VGVzdC5QaW5nUmVxdWVzdBojLk5ldEdycGNQcm9tZXRoZXVzVGVzdC5QaW5n",
-            "UmVzcG9uc2UiACgBMAFiBnByb3RvMw=="));
+            "Cgp0ZXN0LnByb3RvEhpOZXRHcnBjUHJvbWV0aGV1c1Rlc3QuR3JwYyJBCgtQ",
+            "aW5nUmVxdWVzdBIyCgZzdGF0dXMYASABKA4yIi5OZXRHcnBjUHJvbWV0aGV1",
+            "c1Rlc3QuR3JwYy5TdGF0dXMiHwoMUGluZ1Jlc3BvbnNlEg8KB21lc3NhZ2UY",
+            "ASABKAkqGQoGU3RhdHVzEgYKAk9LEAASBwoDQmFkEAEysgMKC1Rlc3RTZXJ2",
+            "aWNlEmAKCVVuYXJ5UGluZxInLk5ldEdycGNQcm9tZXRoZXVzVGVzdC5HcnBj",
+            "LlBpbmdSZXF1ZXN0GiguTmV0R3JwY1Byb21ldGhldXNUZXN0LkdycGMuUGlu",
+            "Z1Jlc3BvbnNlIgASbAoTQ2xpZW50U3RyZWFtaW5nUGluZxInLk5ldEdycGNQ",
+            "cm9tZXRoZXVzVGVzdC5HcnBjLlBpbmdSZXF1ZXN0GiguTmV0R3JwY1Byb21l",
+            "dGhldXNUZXN0LkdycGMuUGluZ1Jlc3BvbnNlIgAoARJsChNTZXJ2ZXJTdHJl",
+            "YW1pbmdQaW5nEicuTmV0R3JwY1Byb21ldGhldXNUZXN0LkdycGMuUGluZ1Jl",
+            "cXVlc3QaKC5OZXRHcnBjUHJvbWV0aGV1c1Rlc3QuR3JwYy5QaW5nUmVzcG9u",
+            "c2UiADABEmUKCkR1cGxleFBpbmcSJy5OZXRHcnBjUHJvbWV0aGV1c1Rlc3Qu",
+            "R3JwYy5QaW5nUmVxdWVzdBooLk5ldEdycGNQcm9tZXRoZXVzVGVzdC5HcnBj",
+            "LlBpbmdSZXNwb25zZSIAKAEwAWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::NetGrpcPrometheusTest.Status), }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.PingRequest), global::NetGrpcPrometheusTest.PingRequest.Parser, new[]{ "Status" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.PingResponse), global::NetGrpcPrometheusTest.PingResponse.Parser, new[]{ "Message" }, null, null, null)
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::NetGrpcPrometheusTest.Grpc.Status), }, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.Grpc.PingRequest), global::NetGrpcPrometheusTest.Grpc.PingRequest.Parser, new[]{ "Status" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::NetGrpcPrometheusTest.Grpc.PingResponse), global::NetGrpcPrometheusTest.Grpc.PingResponse.Parser, new[]{ "Message" }, null, null, null)
           }));
     }
     #endregion
@@ -64,7 +65,7 @@ namespace NetGrpcPrometheusTest {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::NetGrpcPrometheusTest.TestReflection.Descriptor.MessageTypes[0]; }
+      get { return global::NetGrpcPrometheusTest.Grpc.TestReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -92,9 +93,9 @@ namespace NetGrpcPrometheusTest {
 
     /// <summary>Field number for the "status" field.</summary>
     public const int StatusFieldNumber = 1;
-    private global::NetGrpcPrometheusTest.Status status_ = 0;
+    private global::NetGrpcPrometheusTest.Grpc.Status status_ = 0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::NetGrpcPrometheusTest.Status Status {
+    public global::NetGrpcPrometheusTest.Grpc.Status Status {
       get { return status_; }
       set {
         status_ = value;
@@ -176,7 +177,7 @@ namespace NetGrpcPrometheusTest {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            status_ = (global::NetGrpcPrometheusTest.Status) input.ReadEnum();
+            status_ = (global::NetGrpcPrometheusTest.Grpc.Status) input.ReadEnum();
             break;
           }
         }
@@ -193,7 +194,7 @@ namespace NetGrpcPrometheusTest {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::NetGrpcPrometheusTest.TestReflection.Descriptor.MessageTypes[1]; }
+      get { return global::NetGrpcPrometheusTest.Grpc.TestReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
