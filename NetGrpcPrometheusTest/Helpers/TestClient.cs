@@ -7,6 +7,8 @@ using Grpc.Core.Interceptors;
 using NetGrpcPrometheus;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
+using NetGrpcPrometheusTest.Grpc;
+using Status = NetGrpcPrometheusTest.Grpc.Status;
 
 namespace NetGrpcPrometheusTest.Helpers
 {
@@ -14,40 +16,28 @@ namespace NetGrpcPrometheusTest.Helpers
     {
         public static readonly MetricsBase Metrics = new ClientMetrics();
         public static readonly string MetricsHostname = "127.0.0.1";
-        public static readonly int MetricsPort = 50053;
 
         public string UnaryName => nameof(_client.UnaryPing);
         public string ClientStreamingName => nameof(_client.ClientStreamingPing);
         public string ServerStreamingName => nameof(_client.ServerStreamingPing);
         public string DuplexStreamingName => nameof(_client.DuplexPing);
+        public int MetricsPort;
 
         private readonly TestService.TestServiceClient _client;
 
-        public TestClient()
+        public TestClient(string grpcHostName, int grpcPort, int metricsPort)
         {
-            ClientInterceptor interceptor =
-                new ClientInterceptor(MetricsHostname, MetricsPort) {EnableLatencyMetrics = true};
+            MetricsPort = metricsPort;
 
-            Channel channel = new Channel(TestServer.GrpcHostname, TestServer.GrpcPort, ChannelCredentials.Insecure);
+            ClientInterceptor interceptor =
+                new ClientInterceptor(MetricsHostname, metricsPort) {EnableLatencyMetrics = true};
+
+            Channel channel = new Channel(grpcHostName, grpcPort, ChannelCredentials.Insecure);
             _client = new TestService.TestServiceClient(
                 channel.Intercept(interceptor));
-
-            UnaryCall();
-            UnaryCallAsync().Wait();
-            ClientStreamingCall().Wait();
-            ServerStreamingCall().Wait();
-            DuplexStreamingCall().Wait();
-
-            UnaryCall(Status.Bad);
-            UnaryCallAsync(Status.Bad).Wait();
-            ClientStreamingCall(Status.Bad).Wait();
-            ServerStreamingCall(Status.Bad).Wait();
-            DuplexStreamingCall(Status.Bad).Wait();
-
-            Task.Run(() => { Thread.Sleep(2000); }).Wait();
         }
 
-        private void UnaryCall(Status status = Status.Ok)
+        public void UnaryCall(Status status = Status.Ok)
         {
             try
             {
@@ -59,7 +49,7 @@ namespace NetGrpcPrometheusTest.Helpers
             }
         }
 
-        private async Task UnaryCallAsync(Status status = Status.Ok)
+        public async Task UnaryCallAsync(Status status = Status.Ok)
         {
             try
             {
@@ -71,7 +61,7 @@ namespace NetGrpcPrometheusTest.Helpers
             }
         }
 
-        private async Task ClientStreamingCall(Status status = Status.Ok)
+        public async Task ClientStreamingCall(Status status = Status.Ok)
         {
             try
             {
@@ -89,7 +79,7 @@ namespace NetGrpcPrometheusTest.Helpers
             
         }
 
-        private async Task ServerStreamingCall(Status status = Status.Ok)
+        public async Task ServerStreamingCall(Status status = Status.Ok)
         {
             try
             {
@@ -107,7 +97,7 @@ namespace NetGrpcPrometheusTest.Helpers
             }
         }
 
-        private async Task DuplexStreamingCall(Status status = Status.Ok)
+        public async Task DuplexStreamingCall(Status status = Status.Ok)
         {
             try
             {
@@ -131,6 +121,11 @@ namespace NetGrpcPrometheusTest.Helpers
             {
                 // ignored
             }
+        }
+
+        public void Wait()
+        {
+            Task.Run(() => { Thread.Sleep(2000); }).Wait();
         }
     }
 }

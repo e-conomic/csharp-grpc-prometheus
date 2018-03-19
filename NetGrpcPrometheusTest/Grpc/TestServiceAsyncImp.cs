@@ -4,13 +4,17 @@ using Grpc.Core;
 
 namespace NetGrpcPrometheusTest.Grpc
 {
-    public class TestServiceImp : TestService.TestServiceBase
+    public class TestServiceAsyncImp : TestService.TestServiceBase
     {
-        public override Task<PingResponse> UnaryPing(PingRequest request, ServerCallContext context)
+        public override async Task<PingResponse> UnaryPing(PingRequest request, ServerCallContext context)
         {
             if (request.Status == Status.Ok)
             {
-                return Task.FromResult(new PingResponse() {Message = "OK"});
+                PingResponse response = null;
+
+                await Task.Run(() => response = new PingResponse() {Message = "OK"});
+                
+                return response;
             }
 
             global::Grpc.Core.Status status = new global::Grpc.Core.Status(StatusCode.Internal, "details");
@@ -26,7 +30,7 @@ namespace NetGrpcPrometheusTest.Grpc
                     ThrowException();
                 }
             }
-            
+
             return new PingResponse() { Message = "OK" };
         }
 
