@@ -88,11 +88,15 @@ grpc_server_handling_seconds. It contains three sub-metrics:
 * `grpc_server_handling_seconds_sum` - cumulative time of RPCs by status and method, useful for calculating average handling times
 * `grpc_server_handling_seconds_bucket` - contains the counts of RPCs by status and method in respective handling-time buckets
 
-### Useful query examples
+## Custom Metrics
+
+For custom metrics follow guidelines on [prometheus-net](https://github.com/prometheus-net/prometheus-net). Please note that [MetricsServer](https://github.com/prometheus-net/prometheus-net/blob/master/Prometheus.NetStandard/MetricServer.cs) is already running so you can jump directly to creating the metrics.
+
+## Useful query examples
 
 Please find them on [grpc-ecosystem/go-grpc-prometheus](https://github.com/grpc-ecosystem/go-grpc-prometheus)
 
-### License
+## License
 
 Please find the license [here](LICENSE)
 
