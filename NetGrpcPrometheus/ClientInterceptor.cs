@@ -13,8 +13,12 @@ namespace NetGrpcPrometheus
     /// <summary>
     /// Interceptor for intercepting calls on client side
     /// </summary>
-    public class ClientInterceptor : Interceptor
+    public class ClientInterceptor : Interceptor, IDisposable
     {
+        private readonly MetricServer _metricServer;
+        
+        private readonly MetricsBase _metrics;
+        
         /// <summary>
         /// Enable recording of latency for responses. By default it's set to false
         /// </summary>
@@ -23,9 +27,7 @@ namespace NetGrpcPrometheus
             get => _metrics.EnableLatencyMetrics;
             set => _metrics.EnableLatencyMetrics = value;
         }
-        
-        private readonly MetricsBase _metrics;
-
+    
         /// <summary>
         /// Constructor for client side interceptor with metric server.
         /// Metric server will be created and provide metrics on /metrics endpoint.
@@ -37,8 +39,8 @@ namespace NetGrpcPrometheus
         public ClientInterceptor(string hostname, int port, bool defaultMetrics = true,
             bool enableLatencyMetrics = false)
         {
-            MetricServer metricServer = new MetricServer(hostname, port);
-            metricServer.Start();
+            _metricServer = new MetricServer(hostname, port);
+            _metricServer.Start();
 
             if (!defaultMetrics)
             {
@@ -260,6 +262,11 @@ namespace NetGrpcPrometheus
             }
 
             return result;
+        }
+
+        public void Dispose()
+        {
+            ((IDisposable) _metricServer)?.Dispose();
         }
     }
 }

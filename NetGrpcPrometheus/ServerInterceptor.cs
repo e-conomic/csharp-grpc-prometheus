@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
@@ -12,8 +13,12 @@ namespace NetGrpcPrometheus
     /// <summary>
     /// Interceptor for intercepting calls on server side 
     /// </summary>
-    public class ServerInterceptor : Interceptor
+    public class ServerInterceptor : Interceptor, IDisposable
     {
+        private readonly MetricServer _metricServer;
+        
+        private readonly MetricsBase _metrics;
+
         /// <summary>
         /// Enable recording of latency for responses. By default it's set to false
         /// </summary>
@@ -22,8 +27,6 @@ namespace NetGrpcPrometheus
             get => _metrics.EnableLatencyMetrics;
             set => _metrics.EnableLatencyMetrics = value;
         }
-
-        private readonly MetricsBase _metrics;
 
         /// <summary>
         /// Constructor for server side interceptor
@@ -34,8 +37,8 @@ namespace NetGrpcPrometheus
         /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
         public ServerInterceptor(string hostname, int port, bool defaultMetrics = true, bool enableLatencyMetrics = false)
         {
-            MetricServer metricServer = new MetricServer(hostname, port);
-            metricServer.Start();
+            _metricServer = new MetricServer(hostname, port);
+            _metricServer.Start();
             
             if (!defaultMetrics)
             {
@@ -182,6 +185,11 @@ namespace NetGrpcPrometheus
             }
 
             return result;
+        }
+
+        public void Dispose()
+        {
+            _metricServer.Stop();
         }
     }
 }
