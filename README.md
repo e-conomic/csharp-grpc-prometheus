@@ -1,10 +1,12 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/89i4e4jf79nyay6x/branch/master?svg=true)](https://ci.appveyor.com/project/visma/csharp-grpc-prometheus-fsrr6/branch/master) ![Nuget](https://img.shields.io/nuget/v/NetGrpcPrometheus.svg)
+
 # C# gRPC interceptors for Prometheus monitoring
 [Prometheus](https://prometheus.io/) monitoring for [gRPC C#](https://github.com/grpc/grpc) servers and clients.
 
 This project was inspired by [grpc-ecosystem/go-grpc-prometheus](https://github.com/grpc-ecosystem/go-grpc-prometheus) 
 and [grpc-ecosystem/java-grpc-prometheus](https://github.com/grpc-ecosystem/java-grpc-prometheus)
 
-Library is build in .NET standart 2.0 and uses [prometheus-net](https://github.com/prometheus-net/prometheus-net) for 
+Library is build in .NET standard 2.0 and uses [prometheus-net](https://github.com/prometheus-net/prometheus-net) for 
 Prometheus metrics handling.
 
 ## Usage
