@@ -5,19 +5,23 @@
     <PackageId>NetGrpcPrometheus</PackageId>
     <Authors>Visma e-conomic</Authors>
     <Company>Visma e-conomic</Company>
-    <Description>Prometheus monitoring for gRPC C# servers and clients
-</Description>
-    <PackageLicenseUrl>https://github.com/e-conomic/csharp-grpc-prometheus/blob/master/LICENSE</PackageLicenseUrl>
+    <Description>Prometheus monitoring for gRPC C# servers and clients</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/e-conomic/csharp-grpc-prometheus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/e-conomic/csharp-grpc-prometheus</RepositoryUrl>
     <PackageTags>Prometheus gRPC Interceptor Metrics Intercept</PackageTags>
     <Copyright>Copyright © 2018 Visma e-conomic</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.5.1" />
     <PackageReference Include="Grpc" Version="1.10.0" />
-    <PackageReference Include="prometheus-net" Version="2.0.0" />
+    <PackageReference Include="prometheus-net" Version="2.1.3" />
   </ItemGroup>
 
 </Project>
