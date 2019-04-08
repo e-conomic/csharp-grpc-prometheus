@@ -63,7 +63,7 @@ namespace NetGrpcPrometheus
             try
             {
                 TResponse result = await continuation(request, context);
-                _metrics.ResponseCounterInc(method, StatusCode.OK);
+                _metrics.ResponseCounterInc(method, context.Status.StatusCode);
                 return result;
             }
             catch (RpcException e)
