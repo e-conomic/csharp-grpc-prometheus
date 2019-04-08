@@ -1,5 +1,10 @@
 version: 1.0.{build}
 image: Visual Studio 2017
+
+environment:
+  API_KEY_SECRET:
+    secure: pHwfrpT3WI+xkvHkGHjzqg2WwmGz+Qx4oN3L/o4iPq+N84EdJOT74bq9j60NMrFs
+
 skip_branch_with_pr: true
 branches:
   only:
@@ -13,5 +18,5 @@ test_script:
 
 deploy_script:
   - ps: |
-      dotnet pack NetGrpcPrometheus/NetGrpcPrometheus.csproj -c Release -Symbols -SymbolPackageFormat snupkg /p:PackageVersion=$env:appveyor_repo_tag_name
-      dotnet nuget push NetGrpcPrometheus/bin/Release/NetGrpcPrometheus.$env:appveyor_repo_tag_name.nupkg -k $env:API_KEY_SECRET -s https://www.nuget.org
+      dotnet pack NetGrpcPrometheus/NetGrpcPrometheus.csproj -c Release -Symbols -SymbolPackageFormat snupkg /p:PackageVersion=$env:APPVEYOR_REPO_TAG_NAME
+      dotnet nuget push NetGrpcPrometheus/bin/Release/NetGrpcPrometheus.$env:APPVEYOR_REPO_TAG_NAME.nupkg -k $env:API_KEY_SECRET -s https://www.nuget.org
