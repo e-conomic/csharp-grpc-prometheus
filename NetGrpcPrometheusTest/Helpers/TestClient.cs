@@ -12,7 +12,7 @@ using Status = NetGrpcPrometheusTest.Grpc.Status;
 
 namespace NetGrpcPrometheusTest.Helpers
 {
-    public class TestClient
+    public class TestClient : IDisposable
     {
         public static readonly MetricsBase Metrics = new ClientMetrics();
         public static readonly string MetricsHostname = "127.0.0.1";
@@ -24,17 +24,18 @@ namespace NetGrpcPrometheusTest.Helpers
         public int MetricsPort;
 
         private readonly TestService.TestServiceClient _client;
+        private ClientInterceptor _interceptor;
 
         public TestClient(string grpcHostName, int grpcPort, int metricsPort)
         {
             MetricsPort = metricsPort;
 
-            ClientInterceptor interceptor =
+            _interceptor =
                 new ClientInterceptor(MetricsHostname, metricsPort) {EnableLatencyMetrics = true};
 
             Channel channel = new Channel(grpcHostName, grpcPort, ChannelCredentials.Insecure);
             _client = new TestService.TestServiceClient(
-                channel.Intercept(interceptor));
+                channel.Intercept(_interceptor));
         }
 
         public void UnaryCall(Status status = Status.Ok)
@@ -126,6 +127,11 @@ namespace NetGrpcPrometheusTest.Helpers
         public void Wait()
         {
             Task.Run(() => { Thread.Sleep(2000); }).Wait();
+        }
+
+        public void Dispose()
+        {
+            _interceptor.Dispose();
         }
     }
 }
