@@ -27,5 +27,5 @@ test_script:
 
 deploy_script:
   - ps: |
-      dotnet pack NetGrpcPrometheus/NetGrpcPrometheus.csproj -c Release
-      dotnet nuget push NetGrpcPrometheus/bin/Release/NetGrpcPrometheus.*.nupkg -k $env:API_KEY_SECRET -s https://www.nuget.org
+      dotnet pack NetGrpcPrometheus/NetGrpcPrometheus.csproj -c Release -o ../
+      dotnet nuget push "NetGrpcPrometheus.$($env:APPVEYOR_BUILD_VERSION).nupkg" -k $env:API_KEY_SECRET -s https://www.nuget.org
