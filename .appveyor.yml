@@ -1,6 +1,15 @@
 version: 1.0.{build}
 image: Visual Studio 2017
 
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+
 environment:
   API_KEY_SECRET:
     secure: pHwfrpT3WI+xkvHkGHjzqg2WwmGz+Qx4oN3L/o4iPq+N84EdJOT74bq9j60NMrFs
