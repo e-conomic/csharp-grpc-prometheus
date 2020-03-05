@@ -12,7 +12,7 @@ namespace NetGrpcPrometheusTest.Utils
         
         public static List<Line> GetLines(string hostname, int port)
         {
-            List<Line> lines = new List<Line>();
+            var lines = new List<Line>();
             string content;
 
             using (WebClient webClient = new WebClient())

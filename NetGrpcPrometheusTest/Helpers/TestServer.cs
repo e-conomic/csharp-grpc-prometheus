@@ -24,10 +24,10 @@ namespace NetGrpcPrometheusTest.Helpers
 
         public TestServer()
         {
-            _metricsServer = new MetricServer(MetricsPort, MetricsHostname);
+            _metricsServer = new MetricServer(MetricsHostname, MetricsPort);
             _metricsServer.Start();
             _interceptor =
-                new ServerInterceptor() {EnableLatencyMetrics = true};
+                new ServerInterceptor {EnableLatencyMetrics = true};
             
             _server = new Server()
             {
@@ -44,6 +44,7 @@ namespace NetGrpcPrometheusTest.Helpers
         public void Shutdown()
         {
             _server.ShutdownAsync().Wait();
+            _metricsServer.Stop();
         }
 
         public void Dispose()

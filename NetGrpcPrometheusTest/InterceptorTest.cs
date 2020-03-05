@@ -37,7 +37,7 @@ namespace NetGrpcPrometheusTest
         [OneTimeTearDown]
         public void TearDown()
         {
-            _server.Shutdown();
+            _server?.Shutdown();
         }
 
         [Test]

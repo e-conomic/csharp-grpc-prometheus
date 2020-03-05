@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Grpc.Core;
+﻿using Grpc.Core;
 using Grpc.Core.Interceptors;
 using NetGrpcPrometheus;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
 using NetGrpcPrometheusTest.Grpc;
+using Prometheus;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Status = NetGrpcPrometheusTest.Grpc.Status;
 
 namespace NetGrpcPrometheusTest.Helpers
@@ -23,17 +23,19 @@ namespace NetGrpcPrometheusTest.Helpers
         public string DuplexStreamingName => nameof(_client.DuplexPing);
         public int MetricsPort;
 
+        private readonly MetricServer _metricsServer;
+
         private readonly TestService.TestServiceClient _client;
         private ClientInterceptor _interceptor;
 
         public TestClient(string grpcHostName, int grpcPort, int metricsPort)
         {
             MetricsPort = metricsPort;
+            _metricsServer = new MetricServer(MetricsHostname, MetricsPort);
+            _metricsServer.Start();
+            _interceptor = new ClientInterceptor(true);
 
-            _interceptor =
-                new ClientInterceptor(MetricsHostname, metricsPort) {EnableLatencyMetrics = true};
-
-            Channel channel = new Channel(grpcHostName, grpcPort, ChannelCredentials.Insecure);
+            var channel = new Channel(grpcHostName, grpcPort, ChannelCredentials.Insecure);
             _client = new TestService.TestServiceClient(
                 channel.Intercept(_interceptor));
         }
@@ -131,6 +133,7 @@ namespace NetGrpcPrometheusTest.Helpers
 
         public void Dispose()
         {
+            _metricsServer.StopAsync().Wait();
             _interceptor.Dispose();
         }
     }

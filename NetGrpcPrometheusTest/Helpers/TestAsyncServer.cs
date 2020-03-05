@@ -1,9 +1,8 @@
 ﻿using Grpc.Core;
 using Grpc.Core.Interceptors;
 using NetGrpcPrometheus;
-using NetGrpcPrometheus.Helpers;
-using NetGrpcPrometheus.Models;
 using NetGrpcPrometheusTest.Grpc;
+using Prometheus;
 
 namespace NetGrpcPrometheusTest.Helpers
 {
@@ -14,14 +13,14 @@ namespace NetGrpcPrometheusTest.Helpers
         public static readonly string MetricsHostname = "127.0.0.1";
         public static readonly int MetricsPort = 9004;
 
-        public static readonly MetricsBase Metrics = new ServerMetrics();
-
+        private readonly MetricServer _metricsServer;
         private readonly Server _server;
 
         public TestAsyncServer()
         {
-            ServerInterceptor interceptor =
-                new ServerInterceptor { EnableLatencyMetrics = true };
+            _metricsServer = new MetricServer(MetricsHostname, MetricsPort);
+            _metricsServer.Start();
+            var interceptor = new ServerInterceptor { EnableLatencyMetrics = true };
 
             _server = new Server()
             {
@@ -37,6 +36,7 @@ namespace NetGrpcPrometheusTest.Helpers
 
         public void Shutdown()
         {
+            _metricsServer.StopAsync().Wait();
             _server.ShutdownAsync().Wait();
         }
     }
