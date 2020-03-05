@@ -23,7 +23,7 @@ namespace NetGrpcPrometheusTest.Helpers
         public TestServer()
         {
             _interceptor =
-                new ServerInterceptor(MetricsHostname, MetricsPort) {EnableLatencyMetrics = true};
+                new ServerInterceptor() {EnableLatencyMetrics = true};
 
             _server = new Server()
             {

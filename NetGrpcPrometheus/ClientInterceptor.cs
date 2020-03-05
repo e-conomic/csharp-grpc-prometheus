@@ -6,7 +6,6 @@ using Grpc.Core.Interceptors;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
 using Prometheus;
-using Prometheus.Advanced;
 
 namespace NetGrpcPrometheus
 {
@@ -39,14 +38,6 @@ namespace NetGrpcPrometheus
         public ClientInterceptor(string hostname, int port, bool defaultMetrics = true,
             bool enableLatencyMetrics = false)
         {
-            _metricServer = new MetricServer(hostname, port);
-            _metricServer.Start();
-
-            if (!defaultMetrics)
-            {
-                DefaultCollectorRegistry.Instance.Clear();
-            }
-
             _metrics = new ClientMetrics();
             EnableLatencyMetrics = enableLatencyMetrics;
             //_statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
@@ -66,16 +57,11 @@ namespace NetGrpcPrometheus
         /// <param name="registry"></param>
         public ClientInterceptor(string endpoint, string job, bool defaultMetrics = true, bool enableLatencyMetrics = false,
             string instance = null, ulong intervalMilliseconds = 1000,
-            IEnumerable<Tuple<string, string>> additionalLabels = null, ICollectorRegistry registry = null)
+            IEnumerable<Tuple<string, string>> additionalLabels = null)
         {
             MetricPusher metricServer = new MetricPusher(endpoint, job, instance, (long) intervalMilliseconds,
-                additionalLabels, registry);
+                additionalLabels);
             metricServer.Start();
-            
-            if (!defaultMetrics)
-            {
-                DefaultCollectorRegistry.Instance.Clear();
-            }
 
             _metrics = new ClientMetrics();
             EnableLatencyMetrics = enableLatencyMetrics;

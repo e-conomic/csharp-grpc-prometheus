@@ -30,7 +30,7 @@ namespace NetGrpcPrometheus.Helpers
 
         public void Dispose()
         {
-            _reader.Dispose();
+            
         }
 
         public Task<bool> MoveNext(CancellationToken cancellationToken)

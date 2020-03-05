@@ -21,7 +21,7 @@ namespace NetGrpcPrometheusTest.Helpers
         public TestAsyncServer()
         {
             ServerInterceptor interceptor =
-                new ServerInterceptor(MetricsHostname, MetricsPort) { EnableLatencyMetrics = true };
+                new ServerInterceptor { EnableLatencyMetrics = true };
 
             _server = new Server()
             {
