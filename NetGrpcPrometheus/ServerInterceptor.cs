@@ -1,12 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using Grpc.Core;
+﻿using Grpc.Core;
 using Grpc.Core.Interceptors;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
-using Prometheus;
-using Prometheus.Advanced;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace NetGrpcPrometheus
 {
@@ -15,8 +13,6 @@ namespace NetGrpcPrometheus
     /// </summary>
     public class ServerInterceptor : Interceptor, IDisposable
     {
-        private readonly MetricServer _metricServer;
-        
         private readonly MetricsBase _metrics;
 
         /// <summary>
@@ -31,20 +27,9 @@ namespace NetGrpcPrometheus
         /// <summary>
         /// Constructor for server side interceptor
         /// </summary>
-        /// <param name="hostname">Host name for Prometheus metrics server - e.g. localhost</param>
-        /// <param name="port">Port for Prometheus server</param>
-        /// <param name="defaultMetrics">Indicates if Prometheus metrics server should record default metrics</param>
         /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
-        public ServerInterceptor(string hostname, int port, bool defaultMetrics = true, bool enableLatencyMetrics = false)
+        public ServerInterceptor(bool enableLatencyMetrics = false)
         {
-            _metricServer = new MetricServer(hostname, port);
-            _metricServer.Start();
-            
-            if (!defaultMetrics)
-            {
-                DefaultCollectorRegistry.Instance.Clear();
-            }
-
             _metrics = new ServerMetrics();
             EnableLatencyMetrics = enableLatencyMetrics;
         }
@@ -53,16 +38,16 @@ namespace NetGrpcPrometheus
             ServerCallContext context,
             UnaryServerMethod<TRequest, TResponse> continuation)
         {
-            GrpcMethodInfo method = new GrpcMethodInfo(context.Method, MethodType.Unary);
+            var method = new GrpcMethodInfo(context.Method, MethodType.Unary);
 
             _metrics.RequestCounterInc(method);
 
-            Stopwatch watch = new Stopwatch();
+            var watch = new Stopwatch();
             watch.Start();
 
             try
             {
-                TResponse result = await continuation(request, context);
+                var result = await continuation(request, context);
                 _metrics.ResponseCounterInc(method, context.Status.StatusCode);
                 return result;
             }
@@ -189,7 +174,6 @@ namespace NetGrpcPrometheus
 
         public void Dispose()
         {
-            _metricServer.Stop();
         }
     }
 }

@@ -15,7 +15,10 @@ You can set up client-side or server-side interceptor.
 ### Server-side
 
 ```C#
-ServerInterceptor interceptor = new ServerInterceptor(hostname: "127.0.0.1", port: "1234");
+var metricsServer = new MetricServer("127.0.0.1", 1234); // standard metrics server prometheus-net
+metricsServer.Start();
+
+ServerInterceptor interceptor = new ServerInterceptor();
 
 Server server = new Server();
 server.Services.Add(TestService.BindService(new TestServiceImp()).Intercept(interceptor));

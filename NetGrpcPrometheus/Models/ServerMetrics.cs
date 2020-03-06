@@ -33,8 +33,9 @@ namespace NetGrpcPrometheus.Models
 
             LatencyHistogram = Metrics.CreateHistogram("grpc_server_handling_seconds",
                 "Histogram of response latency (seconds) of gRPC",
-                new[] { .001, .005, .01, .05, 0.075, .1, .25, .5, 1, 2, 5, 10 }, "grpc_type", "grpc_service",
-                "grpc_method");
+                new HistogramConfiguration { Buckets = new[] { .001, .005, .01, .05, 0.075, .1, .25, .5, 1, 2, 5, 10 }, LabelNames = new []{"grpc_type", "grpc_service",
+                    "grpc_method"}
+                });
         }
     }
 }

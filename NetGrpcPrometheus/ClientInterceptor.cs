@@ -6,7 +6,6 @@ using Grpc.Core.Interceptors;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
 using Prometheus;
-using Prometheus.Advanced;
 
 namespace NetGrpcPrometheus
 {
@@ -32,21 +31,9 @@ namespace NetGrpcPrometheus
         /// Constructor for client side interceptor with metric server.
         /// Metric server will be created and provide metrics on /metrics endpoint.
         /// </summary>
-        /// <param name="hostname">Host name for Prometheus metrics server - e.g. localhost</param>
-        /// <param name="port">Port for Prometheus server</param>
-        /// <param name="defaultMetrics">Indicates if Prometheus metrics server should record default metrics</param>
         /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
-        public ClientInterceptor(string hostname, int port, bool defaultMetrics = true,
-            bool enableLatencyMetrics = false)
+        public ClientInterceptor(bool enableLatencyMetrics = false)
         {
-            _metricServer = new MetricServer(hostname, port);
-            _metricServer.Start();
-
-            if (!defaultMetrics)
-            {
-                DefaultCollectorRegistry.Instance.Clear();
-            }
-
             _metrics = new ClientMetrics();
             EnableLatencyMetrics = enableLatencyMetrics;
             //_statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
@@ -66,16 +53,11 @@ namespace NetGrpcPrometheus
         /// <param name="registry"></param>
         public ClientInterceptor(string endpoint, string job, bool defaultMetrics = true, bool enableLatencyMetrics = false,
             string instance = null, ulong intervalMilliseconds = 1000,
-            IEnumerable<Tuple<string, string>> additionalLabels = null, ICollectorRegistry registry = null)
+            IEnumerable<Tuple<string, string>> additionalLabels = null)
         {
-            MetricPusher metricServer = new MetricPusher(endpoint, job, instance, (long) intervalMilliseconds,
-                additionalLabels, registry);
+            var metricServer = new MetricPusher(endpoint, job, instance, (long) intervalMilliseconds,
+                additionalLabels);
             metricServer.Start();
-            
-            if (!defaultMetrics)
-            {
-                DefaultCollectorRegistry.Instance.Clear();
-            }
 
             _metrics = new ClientMetrics();
             EnableLatencyMetrics = enableLatencyMetrics;
@@ -89,8 +71,7 @@ namespace NetGrpcPrometheus
 
             _metrics.RequestCounterInc(method);
 
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
+            var watch = Stopwatch.StartNew();
 
             TResponse result;
 
@@ -120,8 +101,7 @@ namespace NetGrpcPrometheus
 
             _metrics.RequestCounterInc(method);
 
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
+            var watch = Stopwatch.StartNew();
 
             AsyncUnaryCall<TResponse> result = continuation(request, context);
             
@@ -152,8 +132,7 @@ namespace NetGrpcPrometheus
 
             _metrics.RequestCounterInc(method);
 
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
+            var watch = Stopwatch.StartNew();
 
             AsyncClientStreamingCall<TRequest, TResponse> streamingCall = continuation(context);
             AsyncClientStreamingCall<TRequest, TResponse> result = new AsyncClientStreamingCall<TRequest, TResponse>(
@@ -191,8 +170,7 @@ namespace NetGrpcPrometheus
 
             _metrics.RequestCounterInc(method);
 
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
+            var watch = Stopwatch.StartNew();
 
             AsyncServerStreamingCall<TResponse> result;
 
@@ -229,8 +207,7 @@ namespace NetGrpcPrometheus
 
             _metrics.RequestCounterInc(method);
 
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
+            var watch = Stopwatch.StartNew();
 
             AsyncDuplexStreamingCall<TRequest, TResponse> result;
 

@@ -32,7 +32,6 @@ namespace NetGrpcPrometheusTest
             await _client.ServerStreamingCall(Status.Bad);
             await _client.DuplexStreamingCall(Status.Bad);
         }
-    
         [Test]
         public void TestFirstInvocationTeardown() {}
     

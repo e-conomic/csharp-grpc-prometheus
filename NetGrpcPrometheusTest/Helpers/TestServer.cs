@@ -5,6 +5,7 @@ using NetGrpcPrometheus;
 using NetGrpcPrometheus.Helpers;
 using NetGrpcPrometheus.Models;
 using NetGrpcPrometheusTest.Grpc;
+using Prometheus;
 
 namespace NetGrpcPrometheusTest.Helpers
 {
@@ -17,14 +18,17 @@ namespace NetGrpcPrometheusTest.Helpers
 
         public static readonly MetricsBase Metrics = new ServerMetrics();
 
+        private readonly MetricServer _metricsServer;
         private readonly Server _server;
         private readonly ServerInterceptor _interceptor;
 
         public TestServer()
         {
+            _metricsServer = new MetricServer(MetricsHostname, MetricsPort);
+            _metricsServer.Start();
             _interceptor =
-                new ServerInterceptor(MetricsHostname, MetricsPort) {EnableLatencyMetrics = true};
-
+                new ServerInterceptor {EnableLatencyMetrics = true};
+            
             _server = new Server()
             {
                 Services =
@@ -40,6 +44,7 @@ namespace NetGrpcPrometheusTest.Helpers
         public void Shutdown()
         {
             _server.ShutdownAsync().Wait();
+            _metricsServer.Stop();
         }
 
         public void Dispose()
