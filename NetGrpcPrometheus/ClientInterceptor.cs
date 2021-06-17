@@ -12,9 +12,8 @@ namespace NetGrpcPrometheus
     /// <summary>
     /// Interceptor for intercepting calls on client side
     /// </summary>
-    public class ClientInterceptor : Interceptor, IDisposable
+    public class ClientInterceptor : Interceptor
     {
-        private readonly MetricServer _metricServer;
         
         private readonly MetricsBase _metrics;
         
@@ -239,11 +238,6 @@ namespace NetGrpcPrometheus
             }
 
             return result;
-        }
-
-        public void Dispose()
-        {
-            ((IDisposable) _metricServer)?.Dispose();
         }
     }
 }
