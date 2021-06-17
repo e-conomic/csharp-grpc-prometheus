@@ -177,10 +177,16 @@ namespace NetGrpcPrometheus
             {
                 AsyncServerStreamingCall<TResponse> streamingCall = continuation(request, context);
 
-                result = new AsyncServerStreamingCall<TResponse>(
-                    new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                        () => { _metrics.StreamReceivedCounterInc(method); }), streamingCall.ResponseHeadersAsync,
-                    streamingCall.GetStatus, streamingCall.GetTrailers, streamingCall.Dispose);
+                result =
+                    new AsyncServerStreamingCall<TResponse>(
+                        new WrapperStreamReader<TResponse>(
+                            streamingCall.ResponseStream,
+                            () => { _metrics.StreamReceivedCounterInc(method); },
+                            statusCode => { _metrics.ResponseCounterInc(method, statusCode); }),
+                        streamingCall.ResponseHeadersAsync,
+                        streamingCall.GetStatus,
+                        streamingCall.GetTrailers,
+                        streamingCall.Dispose);
 
                 _metrics.ResponseCounterInc(method, StatusCode.OK);
             }
@@ -215,8 +221,10 @@ namespace NetGrpcPrometheus
                 AsyncDuplexStreamingCall<TRequest, TResponse> streamingCall = continuation(context);
 
                 WrapperStreamReader<TResponse> responseStream =
-                    new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                        () => { _metrics.StreamReceivedCounterInc(method); });
+                    new WrapperStreamReader<TResponse>(
+                        streamingCall.ResponseStream,
+                        () => { _metrics.StreamReceivedCounterInc(method); },
+                        statusCode => { _metrics.ResponseCounterInc(method, statusCode); });
 
                 result = new AsyncDuplexStreamingCall<TRequest, TResponse>(
                     new WrapperClientStreamWriter<TRequest>(streamingCall.RequestStream,

@@ -16,33 +16,38 @@ namespace NetGrpcPrometheus.Helpers
 
         private readonly IAsyncStreamReader<T> _reader;
         private readonly Action _onMessage;
+        private readonly Action<StatusCode> _onError;
 
         /// <summary>
         /// Constructor for <see cref="IAsyncStreamReader{T}"/> wrapper
         /// </summary>
         /// <param name="reader">Stream reader that should be wrapped by this class</param>
         /// <param name="onMessage">Action that should be executed on each message received from the stream</param>
-        public WrapperStreamReader(IAsyncStreamReader<T> reader, Action onMessage)
+        public WrapperStreamReader(IAsyncStreamReader<T> reader, Action onMessage, Action<StatusCode> onError)
         {
             _reader = reader;
             _onMessage = onMessage;
+            _onError = onError;
         }
 
         public void Dispose()
         {
-            
+
         }
 
-        public Task<bool> MoveNext(CancellationToken cancellationToken)
+        public async Task<bool> MoveNext(CancellationToken cancellationToken)
         {
-            Task<bool> result = _reader.MoveNext(cancellationToken);
-
-            result.ContinueWith(task =>
+            try
             {
+                var result = await _reader.MoveNext(cancellationToken);
                 _onMessage.Invoke();
-            }, cancellationToken);
-
-            return result;
+                return result;
+            }
+            catch (RpcException e)
+            {
+                _onError(e.StatusCode);
+                throw;
+            }
         }
     }
 }
