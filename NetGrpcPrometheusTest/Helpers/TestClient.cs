@@ -134,7 +134,6 @@ namespace NetGrpcPrometheusTest.Helpers
         public void Dispose()
         {
             _metricsServer.StopAsync().Wait();
-            _interceptor.Dispose();
         }
     }
 }

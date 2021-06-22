@@ -11,7 +11,7 @@ namespace NetGrpcPrometheus
     /// <summary>
     /// Interceptor for intercepting calls on server side 
     /// </summary>
-    public class ServerInterceptor : Interceptor, IDisposable
+    public class ServerInterceptor : Interceptor
     {
         private readonly MetricsBase _metrics;
 
@@ -115,8 +115,11 @@ namespace NetGrpcPrometheus
             try
             {
                 result = continuation(
-                    new WrapperStreamReader<TRequest>(requestStream,
-                        () => { _metrics.StreamReceivedCounterInc(method); }), context);
+                    new WrapperStreamReader<TRequest>(
+                        requestStream,
+                        () => { _metrics.StreamReceivedCounterInc(method); },
+                        statusCode => { _metrics.ResponseCounterInc(method, statusCode); }),
+                    context);
 
                 _metrics.ResponseCounterInc(method, StatusCode.OK);
             }
@@ -151,8 +154,10 @@ namespace NetGrpcPrometheus
             try
             {
                 result = continuation(
-                    new WrapperStreamReader<TRequest>(requestStream,
-                        () => { _metrics.StreamReceivedCounterInc(method); }),
+                    new WrapperStreamReader<TRequest>(
+                        requestStream,
+                        () => { _metrics.StreamReceivedCounterInc(method); },
+                        statusCode => { _metrics.ResponseCounterInc(method, statusCode); }),
                     new WrapperServerStreamWriter<TResponse>(responseStream,
                         () => { _metrics.StreamSentCounterInc(method); }), context);
 
@@ -170,10 +175,6 @@ namespace NetGrpcPrometheus
             }
 
             return result;
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

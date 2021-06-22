@@ -12,9 +12,8 @@ namespace NetGrpcPrometheus
     /// <summary>
     /// Interceptor for intercepting calls on client side
     /// </summary>
-    public class ClientInterceptor : Interceptor, IDisposable
+    public class ClientInterceptor : Interceptor
     {
-        private readonly MetricServer _metricServer;
         
         private readonly MetricsBase _metrics;
         
@@ -178,10 +177,16 @@ namespace NetGrpcPrometheus
             {
                 AsyncServerStreamingCall<TResponse> streamingCall = continuation(request, context);
 
-                result = new AsyncServerStreamingCall<TResponse>(
-                    new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                        () => { _metrics.StreamReceivedCounterInc(method); }), streamingCall.ResponseHeadersAsync,
-                    streamingCall.GetStatus, streamingCall.GetTrailers, streamingCall.Dispose);
+                result =
+                    new AsyncServerStreamingCall<TResponse>(
+                        new WrapperStreamReader<TResponse>(
+                            streamingCall.ResponseStream,
+                            () => { _metrics.StreamReceivedCounterInc(method); },
+                            statusCode => { _metrics.ResponseCounterInc(method, statusCode); }),
+                        streamingCall.ResponseHeadersAsync,
+                        streamingCall.GetStatus,
+                        streamingCall.GetTrailers,
+                        streamingCall.Dispose);
 
                 _metrics.ResponseCounterInc(method, StatusCode.OK);
             }
@@ -216,8 +221,10 @@ namespace NetGrpcPrometheus
                 AsyncDuplexStreamingCall<TRequest, TResponse> streamingCall = continuation(context);
 
                 WrapperStreamReader<TResponse> responseStream =
-                    new WrapperStreamReader<TResponse>(streamingCall.ResponseStream,
-                        () => { _metrics.StreamReceivedCounterInc(method); });
+                    new WrapperStreamReader<TResponse>(
+                        streamingCall.ResponseStream,
+                        () => { _metrics.StreamReceivedCounterInc(method); },
+                        statusCode => { _metrics.ResponseCounterInc(method, statusCode); });
 
                 result = new AsyncDuplexStreamingCall<TRequest, TResponse>(
                     new WrapperClientStreamWriter<TRequest>(streamingCall.RequestStream,
@@ -239,11 +246,6 @@ namespace NetGrpcPrometheus
             }
 
             return result;
-        }
-
-        public void Dispose()
-        {
-            ((IDisposable) _metricServer)?.Dispose();
         }
     }
 }

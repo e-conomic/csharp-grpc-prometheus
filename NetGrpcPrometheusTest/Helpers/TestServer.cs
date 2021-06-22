@@ -50,7 +50,6 @@ namespace NetGrpcPrometheusTest.Helpers
         public void Dispose()
         {
             Shutdown();
-            _interceptor?.Dispose();
         }
     }
 }
