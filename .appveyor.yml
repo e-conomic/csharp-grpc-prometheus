@@ -12,7 +12,7 @@ dotnet_csproj:
 
 environment:
   API_KEY_SECRET:
-    secure: pHwfrpT3WI+xkvHkGHjzqg2WwmGz+Qx4oN3L/o4iPq+N84EdJOT74bq9j60NMrFs
+    secure: pvH1VeTxHY931UXcU3zTl091A0vhkSR6jwxIJAoW9gDnrnXKciItvbitZVczALyu
 
 skip_branch_with_pr: true
 branches:
