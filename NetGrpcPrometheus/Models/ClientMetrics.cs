@@ -16,7 +16,7 @@ namespace NetGrpcPrometheus.Models
         public override Counter StreamSentCounter { get; }
         public override Histogram LatencyHistogram { get; }
         
-        public ClientMetrics()
+        public ClientMetrics(double[] latencyHistogramBuckets = null)
         {
             RequestCounter = Metrics.CreateCounter("grpc_client_started_total",
                 "Total number of RPCs started on the client", "grpc_type", "grpc_service", "grpc_method");
@@ -35,7 +35,7 @@ namespace NetGrpcPrometheus.Models
                 "Histogram of response latency (seconds) of the gRPC",
                 new HistogramConfiguration
                 {
-                    Buckets = new[] { .001, .005, .01, .05, 0.075, .1, .25, .5, 1, 2, 5, 10 },
+                    Buckets = latencyHistogramBuckets ?? new[] { .001, .005, .01, .05, 0.075, .1, .25, .5, 1, 2, 5, 10 },
                     LabelNames = new []{"grpc_type", "grpc_service", "grpc_method"}
                 }
                 );

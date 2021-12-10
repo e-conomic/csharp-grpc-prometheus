@@ -28,12 +28,12 @@ namespace NetGrpcPrometheusTest.Helpers
         private readonly TestService.TestServiceClient _client;
         private ClientInterceptor _interceptor;
 
-        public TestClient(string grpcHostName, int grpcPort, int metricsPort)
+        public TestClient(string grpcHostName, int grpcPort, int metricsPort, ClientMetrics metrics = null)
         {
             MetricsPort = metricsPort;
             _metricsServer = new MetricServer(MetricsHostname, MetricsPort);
             _metricsServer.Start();
-            _interceptor = new ClientInterceptor(true);
+            _interceptor = new ClientInterceptor(true, metrics);
 
             var channel = new Channel(grpcHostName, grpcPort, ChannelCredentials.Insecure);
             _client = new TestService.TestServiceClient(

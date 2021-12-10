@@ -28,9 +28,10 @@ namespace NetGrpcPrometheus
         /// Constructor for server side interceptor
         /// </summary>
         /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
-        public ServerInterceptor(bool enableLatencyMetrics = false)
+        /// <param name="metrics">The metrics object to use, allowing customization of metrics produced. By default, will create a new instance with no customization.</param>
+        public ServerInterceptor(bool enableLatencyMetrics = false, ServerMetrics metrics = null)
         {
-            _metrics = new ServerMetrics();
+            _metrics = metrics ?? new ServerMetrics();
             EnableLatencyMetrics = enableLatencyMetrics;
         }
 

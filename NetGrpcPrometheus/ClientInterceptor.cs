@@ -31,9 +31,10 @@ namespace NetGrpcPrometheus
         /// Metric server will be created and provide metrics on /metrics endpoint.
         /// </summary>
         /// <param name="enableLatencyMetrics">Enable recording of latency for responses. By default it's set to false</param>
-        public ClientInterceptor(bool enableLatencyMetrics = false)
+        /// <param name="metrics">The metrics object to use, allowing customization of metrics produced. By default, will create a new instance with no customization.</param>
+        public ClientInterceptor(bool enableLatencyMetrics = false, ClientMetrics metrics = null)
         {
-            _metrics = new ClientMetrics();
+            _metrics = metrics ?? new ClientMetrics();
             EnableLatencyMetrics = enableLatencyMetrics;
             //_statusCodes = Enum.GetValues(typeof(StatusCode)).Cast<StatusCode>().ToArray();
         }

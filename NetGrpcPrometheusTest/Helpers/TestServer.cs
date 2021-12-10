@@ -22,12 +22,12 @@ namespace NetGrpcPrometheusTest.Helpers
         private readonly Server _server;
         private readonly ServerInterceptor _interceptor;
 
-        public TestServer()
+        public TestServer(ServerMetrics metrics = null)
         {
             _metricsServer = new MetricServer(MetricsHostname, MetricsPort);
             _metricsServer.Start();
             _interceptor =
-                new ServerInterceptor {EnableLatencyMetrics = true};
+                new ServerInterceptor(enableLatencyMetrics: true, metrics);
             
             _server = new Server()
             {
