@@ -57,6 +57,11 @@ namespace NetGrpcPrometheus
                 _metrics.ResponseCounterInc(method, e.Status.StatusCode);
                 throw;
             }
+            catch (Exception)
+            {
+                _metrics.ResponseCounterInc(method, StatusCode.Internal);
+                throw;
+            }
             finally
             {
                 watch.Stop();
@@ -89,6 +94,11 @@ namespace NetGrpcPrometheus
             catch (RpcException e)
             {
                 _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            catch (Exception)
+            {
+                _metrics.ResponseCounterInc(method, StatusCode.Internal);
                 throw;
             }
             finally
@@ -129,6 +139,11 @@ namespace NetGrpcPrometheus
                 _metrics.ResponseCounterInc(method, e.Status.StatusCode);
                 throw;
             }
+            catch (Exception)
+            {
+                _metrics.ResponseCounterInc(method, StatusCode.Internal);
+                throw;
+            }
             finally
             {
                 watch.Stop();
@@ -167,6 +182,11 @@ namespace NetGrpcPrometheus
             catch (RpcException e)
             {
                 _metrics.ResponseCounterInc(method, e.Status.StatusCode);
+                throw;
+            }
+            catch (Exception)
+            {
+                _metrics.ResponseCounterInc(method, StatusCode.Internal);
                 throw;
             }
             finally
